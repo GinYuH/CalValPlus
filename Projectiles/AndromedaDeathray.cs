@@ -10,23 +10,18 @@ using CalamityMod.Projectiles.BaseProjectiles;
 
 namespace CalValPlus.Projectiles
 {
-    public class AndromedaDeahtray : BaseLaserbeamProjectile
+    public class AndromedaDeathray : BaseLaserbeamProjectile
     {
         public override string Texture => "CalValPlus/Projectiles/DeathRayTop";
 
-        /*public float HueOffset
-        {
-            get => projectile.ai[1];
-            set => projectile.ai[1] = value;
-        }*/
-        public override float MaxScale => 1.1f;
+        public override float MaxScale => 0.5f;
         public override float MaxLaserLength => 2400f;
         public override float Lifetime => 180f;
         public override Color LaserOverlayColor => Color.Yellow;
         public override Color LightCastColor => LaserOverlayColor;
-        public override Texture2D LaserBeginTexture => ModContent.GetTexture("CalValPlus/Projectiles/DeathRayTop");
-        public override Texture2D LaserMiddleTexture => ModContent.GetTexture("CalValPlus/Projectiles/DeathRayMiddle");
-        public override Texture2D LaserEndTexture => ModContent.GetTexture("CalValPlus/Projectiles/DeathRayBottom");
+        public override Texture2D LaserBeginTexture => ModContent.GetTexture("CalValPlus/Projectiles/AndromedaDeathrayTop");
+        public override Texture2D LaserMiddleTexture => ModContent.GetTexture("CalValPlus/Projectiles/AndromedaDeathrayMiddle");
+        public override Texture2D LaserEndTexture => ModContent.GetTexture("CalValPlus/Projectiles/AndromedaDeathrayBottom");
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Andromeda Deathray MK VI");
@@ -37,11 +32,10 @@ namespace CalValPlus.Projectiles
             projectile.hostile = true;
             projectile.penetrate = -1;
             projectile.alpha = 255;
+            projectile.tileCollide = false;
         }
         public override bool PreAI()
         {
-            projectile.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 355;
-            projectile.position.Y = Main.npc[CalValPlusGlobalNPC.androalive].Center.Y + 600;
             return true;
         }
         public override bool ShouldUpdatePosition() => false;
