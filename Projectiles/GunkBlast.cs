@@ -15,58 +15,58 @@ namespace CalValPlus.Projectiles
 		}
 		public override void SetDefaults()
 		{
-			projectile.width = 36;
-			projectile.height = 32;
-			projectile.friendly = true;
-			projectile.timeLeft = 140;
-			projectile.tileCollide = true;
-			projectile.ignoreWater = false;
-			projectile.ranged = true;
+			Projectile.width = 36;
+			Projectile.height = 32;
+			Projectile.friendly = true;
+			Projectile.timeLeft = 140;
+			Projectile.tileCollide = true;
+			Projectile.ignoreWater = false;
+			Projectile.DamageType = DamageClass.Ranged;
 		}
 		public override void AI()
 		{
 			if (Main.rand.NextFloat() < 0.368421f)
 			{
-				int dust = Dust.NewDust(projectile.position, 20, 20, 15, 0f, 0f, 0, new Color(255, 255, 255), 1f);
+				int dust = Dust.NewDust(Projectile.position, 20, 20, 15, 0f, 0f, 0, new Color(255, 255, 255), 1f);
 				Main.dust[dust].noGravity = true;
 			}
-			if (projectile.velocity.X > 0)
+			if (Projectile.velocity.X > 0)
 			{
-				projectile.velocity.X = (projectile.velocity.X - 1);
+				Projectile.velocity.X = (Projectile.velocity.X - 1);
 			}
-			if (projectile.velocity.X < 0)
+			if (Projectile.velocity.X < 0)
 			{
-				projectile.velocity.X = (projectile.velocity.X + 1);
+				Projectile.velocity.X = (Projectile.velocity.X + 1);
 			}
-			if (projectile.velocity.Y > 0)
+			if (Projectile.velocity.Y > 0)
 			{
-				projectile.velocity.Y = (projectile.velocity.Y - 1);
+				Projectile.velocity.Y = (Projectile.velocity.Y - 1);
 			}
-			if (projectile.velocity.Y < 0)
+			if (Projectile.velocity.Y < 0)
 			{
-				projectile.velocity.Y = (projectile.velocity.Y + 1);
+				Projectile.velocity.Y = (Projectile.velocity.Y + 1);
 			}
 		}
 		public override void OnHitNPC(NPC target, int damage, float knockback, bool crit)
 		{
 			target.AddBuff(20, 100);
-			if (projectile.owner == Main.myPlayer)
+			if (Projectile.owner == Main.myPlayer)
 			{
-				Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, 0, 0, mod.ProjectileType("Gunksplosion"), (int)(projectile.damage * 4f), (int)projectile.knockBack, projectile.owner);
-				projectile.timeLeft = 0;
+				Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.X, Projectile.Center.Y, 0, 0, Mod.Find<ModProjectile>("Gunksplosion").Type, (int)(Projectile.damage * 4f), (int)Projectile.knockBack, Projectile.owner);
+				Projectile.timeLeft = 0;
 			}
 		}
 		public override bool OnTileCollide(Vector2 oldVelocity)
 		{
-			Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, 0, 0, mod.ProjectileType("Gunksplosion"), (int)(projectile.damage * 4f), (int)projectile.knockBack, projectile.owner);
-			projectile.timeLeft = 0;
+			Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.X, Projectile.Center.Y, 0, 0, Mod.Find<ModProjectile>("Gunksplosion").Type, (int)(Projectile.damage * 4f), (int)Projectile.knockBack, Projectile.owner);
+			Projectile.timeLeft = 0;
 			return true;
 		}
 
 		public override void Kill(int timeLeft)
 		{
-			Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, 0, 0, mod.ProjectileType("Gunksplosion"), (int)(projectile.damage * 4f), (int)projectile.knockBack, projectile.owner);
-			projectile.timeLeft = 0;
+			Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.X, Projectile.Center.Y, 0, 0, Mod.Find<ModProjectile>("Gunksplosion").Type, (int)(Projectile.damage * 4f), (int)Projectile.knockBack, Projectile.owner);
+			Projectile.timeLeft = 0;
 		}
 	}
 }

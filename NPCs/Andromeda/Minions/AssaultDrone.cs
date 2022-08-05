@@ -19,52 +19,52 @@ namespace CalValPlus.NPCs.Andromeda.Minions
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Assault Drone");
-			Main.npcFrameCount[npc.type] = 8;
+			Main.npcFrameCount[NPC.type] = 8;
 		}
 		public override void SetDefaults()
 		{
-			npc.damage = 0;
-			npc.npcSlots = 0f;
-			npc.width = 60; //324
-			npc.height = 110; //216
-			npc.defense = 10;
-			npc.lifeMax = 20000;
-			npc.aiStyle = -1; //new
-			aiType = -1; //new
-			npc.knockBackResist = 0f;
-			npc.value = Item.buyPrice(0, 0, 0, 0);
-			for (int k = 0; k < npc.buffImmune.Length; k++)
+			NPC.damage = 0;
+			NPC.npcSlots = 0f;
+			NPC.width = 60; //324
+			NPC.height = 110; //216
+			NPC.defense = 10;
+			NPC.lifeMax = 20000;
+			NPC.aiStyle = -1; //new
+			AIType = -1; //new
+			NPC.knockBackResist = 0f;
+			NPC.value = Item.buyPrice(0, 0, 0, 0);
+			for (int k = 0; k < NPC.buffImmune.Length; k++)
 			{
-				npc.buffImmune[k] = true;
+				NPC.buffImmune[k] = true;
 			}
-			npc.lavaImmune = true;
-			npc.behindTiles = false;
-			npc.noGravity = true;
-			npc.noTileCollide = true;
-			npc.HitSound = SoundID.NPCHit4;
-			npc.DeathSound = SoundID.NPCDeath14;
-			npc.dontTakeDamage = false;
+			NPC.lavaImmune = true;
+			NPC.behindTiles = false;
+			NPC.noGravity = true;
+			NPC.noTileCollide = true;
+			NPC.HitSound = SoundID.NPCHit4;
+			NPC.DeathSound = SoundID.NPCDeath14;
+			NPC.dontTakeDamage = false;
 		}
 		
 		public override void AI()
 		{
-			npc.TargetClosest();
+			NPC.TargetClosest();
 			if (CalValPlusGlobalNPC.androalive < 0)
 			{
-				npc.active = false;
-				npc.netUpdate = true;
+				NPC.active = false;
+				NPC.netUpdate = true;
 			}
-			npc.spriteDirection = -npc.direction;
+			NPC.spriteDirection = -NPC.direction;
 			if (noai)
             {
-				npc.ai[0] = 1;
+				NPC.ai[0] = 1;
 				noai = false;
             }
-			if (npc.ai[0] == 1)
+			if (NPC.ai[0] == 1)
 			{
 				{
-					npc.ai[1]++;
-					Vector2 vector97 = new Vector2(npc.Center.X, npc.Center.Y);
+					NPC.ai[1]++;
+					Vector2 vector97 = new Vector2(NPC.Center.X, NPC.Center.Y);
 					float num816 = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - vector97.X;
 					float num817 = Main.npc[CalValPlusGlobalNPC.androalive].Center.Y - vector97.Y;
 					float num818 = (float)Math.Sqrt(num816 * num816 + num817 * num817);
@@ -73,109 +73,109 @@ namespace CalValPlus.NPCs.Andromeda.Minions
 						num818 = 8f / num818;
 						num816 *= num818;
 						num817 *= num818;
-						npc.velocity.X = (npc.velocity.X * 15f + num816) / 16f;
-						npc.velocity.Y = (npc.velocity.Y * 15f + num817) / 16f;
+						NPC.velocity.X = (NPC.velocity.X * 15f + num816) / 16f;
+						NPC.velocity.Y = (NPC.velocity.Y * 15f + num817) / 16f;
 						return;
 					}
-					if (Math.Abs(npc.velocity.X) + Math.Abs(npc.velocity.Y) < 8f)
+					if (Math.Abs(NPC.velocity.X) + Math.Abs(NPC.velocity.Y) < 8f)
 					{
-						npc.velocity.Y *= 1.05f;
-						npc.velocity.X *= 1.05f;
+						NPC.velocity.Y *= 1.05f;
+						NPC.velocity.X *= 1.05f;
 					}
-					if (Main.netMode != 1 && npc.ai[1] >= 180)
+					if (Main.netMode != 1 && NPC.ai[1] >= 180)
 					{
-						npc.ai[1] = 0;
-						npc.ai[0] = 2;
+						NPC.ai[1] = 0;
+						NPC.ai[0] = 2;
 					}
 				}
 			}
-			if (npc.ai[0] == 2)
+			if (NPC.ai[0] == 2)
 			{
-				float Xdist = Math.Abs(npc.Center.X - Main.player[npc.target].Center.X);
+				float Xdist = Math.Abs(NPC.Center.X - Main.player[NPC.target].Center.X);
 				float speedMult = 0.45f;
 				float maxSpeed = 7f;
-				npc.velocity.X += maxSpeed;
-				if (npc.velocity.X > maxSpeed)
+				NPC.velocity.X += maxSpeed;
+				if (NPC.velocity.X > maxSpeed)
 				{
-					npc.velocity.X = maxSpeed;
+					NPC.velocity.X = maxSpeed;
 				}
-				if (npc.velocity.X < 0f - maxSpeed)
+				if (NPC.velocity.X < 0f - maxSpeed)
 				{
-					npc.velocity.X = 0f - maxSpeed;
+					NPC.velocity.X = 0f - maxSpeed;
 				}
 				int distancemin = 200;
-				if (npc.Center.X < Main.player[npc.target].Center.X && npc.ai[2] < 0f && Xdist > (float)-200)
+				if (NPC.Center.X < Main.player[NPC.target].Center.X && NPC.ai[2] < 0f && Xdist > (float)-200)
 				{
-					npc.ai[2] = 0f;
+					NPC.ai[2] = 0f;
 				}
-				if (npc.Center.X > Main.player[npc.target].Center.X && npc.ai[2] > 0f && Xdist > (float)distancemin)
+				if (NPC.Center.X > Main.player[NPC.target].Center.X && NPC.ai[2] > 0f && Xdist > (float)distancemin)
 				{
-					npc.ai[2] = 0f;
+					NPC.ai[2] = 0f;
 				}
-				float Ydist = Main.player[npc.target].position.Y - (npc.position.Y + npc.height);
+				float Ydist = Main.player[NPC.target].position.Y - (NPC.position.Y + NPC.height);
 				if (Ydist < -50f)
 				{
-					npc.velocity.Y -= 0.2f;
+					NPC.velocity.Y -= 0.2f;
 				}
 				if (Ydist > 100f)
 				{
-					npc.velocity.Y += 0.2f;
+					NPC.velocity.Y += 0.2f;
 				}
-				if (npc.velocity.Y > 8f)
+				if (NPC.velocity.Y > 8f)
 				{
-					npc.velocity.Y = 8f;
+					NPC.velocity.Y = 8f;
 				}
-				if (npc.velocity.Y < -8f)
+				if (NPC.velocity.Y < -8f)
 				{
-					npc.velocity.Y = -8f;
+					NPC.velocity.Y = -8f;
 				}
-				npc.ai[1]++;
-				if (npc.ai[1] >= 120)
+				NPC.ai[1]++;
+				if (NPC.ai[1] >= 120)
 				{
-					npc.ai[0] = 3;
-					npc.ai[1] = 0;
+					NPC.ai[0] = 3;
+					NPC.ai[1] = 0;
 				}
 			}
-			if (npc.ai[0] == 3)
+			if (NPC.ai[0] == 3)
 			{
 				Vector2 direction;
-				direction.X = npc.direction;
+				direction.X = NPC.direction;
 				direction.Y = 0;
-				npc.ai[1]++;
-				npc.velocity.X = 0;
-				npc.velocity.Y = 0;
-				if (npc.HasValidTarget && Main.netMode != NetmodeID.MultiplayerClient && npc.ai[1] == 50)
+				NPC.ai[1]++;
+				NPC.velocity.X = 0;
+				NPC.velocity.Y = 0;
+				if (NPC.HasValidTarget && Main.netMode != NetmodeID.MultiplayerClient && NPC.ai[1] == 50)
 				{
-					Projectile.NewProjectile(npc.position, direction, ModContent.ProjectileType<Projectiles.AndromedaDeathray>(), 80, 0f, Main.myPlayer);
+					Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.position, direction, ModContent.ProjectileType<Projectiles.AndromedaDeathray>(), 80, 0f, Main.myPlayer);
 				}
-				if (npc.ai[1] >= 230)
+				if (NPC.ai[1] >= 230)
                 {
-					npc.ai[1] = 0;
-					npc.ai[0] = 1;
+					NPC.ai[1] = 0;
+					NPC.ai[0] = 1;
 				}
 			}
 		}
 		public override bool CheckActive() { return false; }
 		public override void FindFrame(int frameHeight)
 		{
-			npc.frameCounter += 0.15f;
-			npc.frameCounter %= Main.npcFrameCount[npc.type];
-			int frame = (int)npc.frameCounter;
-			npc.frame.Y = frame * frameHeight;
+			NPC.frameCounter += 0.15f;
+			NPC.frameCounter %= Main.npcFrameCount[NPC.type];
+			int frame = (int)NPC.frameCounter;
+			NPC.frame.Y = frame * frameHeight;
 		}
 
-		public override void PostDraw(SpriteBatch spriteBatch, Color drawColor)
+		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
 		{
-			float androframe = 8f / (float)Main.npcFrameCount[npc.type];
+			float androframe = 8f / (float)Main.npcFrameCount[NPC.type];
 
 			//Wings
-			Texture2D wingtexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/Minions/AssaultDroneGlow"));
+			Texture2D wingtexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/Minions/AssaultDroneGlow").Value);
 
-			int wingtextureheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (wingtexture.Height / 8);
+			int wingtextureheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexture.Height / 8);
 
 			Rectangle wingtexturesquare = new Rectangle(0, wingtextureheight - 5, wingtexture.Width, wingtexture.Height / 8);
-			Color wingtexturealpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(wingtexture, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY), wingtexturesquare, wingtexturealpha, npc.rotation, Utils.Size(wingtexturesquare) / 2f, npc.scale, npc.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0f);
+			Color wingtexturealpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(wingtexture, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY), wingtexturesquare, wingtexturealpha, NPC.rotation, Utils.Size(wingtexturesquare) / 2f, NPC.scale, NPC.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0f);
 		}
 	}
 }

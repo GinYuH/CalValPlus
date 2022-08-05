@@ -20,40 +20,40 @@ namespace CalValPlus.NPCs.Andromeda
 		}
 		public override void SetDefaults()
 		{
-			npc.damage = 0;
-			npc.npcSlots = 3f;
-			npc.width = 32; //324
-			npc.height = 32; //216
-			npc.defense = 10;
-			npc.lifeMax = 100000;
-			npc.boss = true;
-			npc.aiStyle = -1; //new
-			Main.npcFrameCount[npc.type] = 1; //new
-			aiType = -1; //new
-			animationType = 10; //new
-			npc.knockBackResist = 0f;
-			npc.value = Item.buyPrice(0, 10, 0, 0);
-			for (int k = 0; k < npc.buffImmune.Length; k++)
+			NPC.damage = 0;
+			NPC.npcSlots = 3f;
+			NPC.width = 32; //324
+			NPC.height = 32; //216
+			NPC.defense = 10;
+			NPC.lifeMax = 5500000;
+			NPC.boss = true;
+			NPC.aiStyle = -1; //new
+			Main.npcFrameCount[NPC.type] = 1; //new
+			AIType = -1; //new
+			AnimationType = 10; //new
+			NPC.knockBackResist = 0f;
+			NPC.value = Item.buyPrice(0, 10, 0, 0);
+			for (int k = 0; k < NPC.buffImmune.Length; k++)
 			{
-				npc.buffImmune[k] = true;
+				NPC.buffImmune[k] = true;
 			}
-			npc.lavaImmune = true;
-			npc.behindTiles = false;
-			npc.noGravity = true;
-			npc.noTileCollide = true;
-			npc.HitSound = SoundID.NPCHit1;
-			npc.DeathSound = SoundID.NPCDeath1;
-			music = MusicID.Boss1;
-			npc.dontTakeDamage = true;
-			npc.netAlways = true;
+			NPC.lavaImmune = true;
+			NPC.behindTiles = false;
+			NPC.noGravity = true;
+			NPC.noTileCollide = true;
+			NPC.HitSound = SoundID.NPCHit1;
+			NPC.DeathSound = SoundID.NPCDeath1;
+			Music = MusicID.Boss1;
+			NPC.dontTakeDamage = true;
+			NPC.netAlways = true;
 		}
 		public override void AI()
 		{
 			spawntimer++;
-			npc.velocity.Y = -1;
+			NPC.velocity.Y = -1;
 			if (spawntimer >= 180)
             {
-				npc.Transform(ModContent.NPCType<Andromeda>());
+				NPC.Transform(ModContent.NPCType<Andromeda>());
 			}
 
 		}

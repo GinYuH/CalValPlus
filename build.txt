@@ -1,4 +1,4 @@
 displayName = Calamity's Vanities: Plus
 author = YuH
 version = 0.1
-modReferences = StructureHelper
+modReferences = CalamityMod, StructureHelper

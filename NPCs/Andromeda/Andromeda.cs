@@ -4,10 +4,11 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using CalValPlus.Projectiles;
-using CalamityMod.CalPlayer;
+using CalamityMod;
 
 namespace CalValPlus.NPCs.Andromeda
 {
@@ -15,16 +16,24 @@ namespace CalValPlus.NPCs.Andromeda
 
 	{
 		int charging = 0;
-		int attacktimer = 0;
 		int framer = 21;
 		int bottomoffset = 0;
 		int face = 0;
 		int wingdelay = 0;
 		int wingrot = 7;
+		int venttimer = 0;
+		int ventframe = 0;
+		int dronespawn = 0;
+		int dronerespawn = 0;
+		int dronepocalypse = 0;
+		int invincibletimer = 0;
+		int ventbuffer = 0;
 		private bool wingdelayt = true;
 		private bool wingup = true;
 		private bool moveup = true;
 		private bool statprobe = true;
+		private bool invincible = false;
+		private bool hasbeeninvincible = false;
 
 		public override void SetStaticDefaults()
 		{
@@ -32,41 +41,38 @@ namespace CalValPlus.NPCs.Andromeda
 		}
 		public override void SetDefaults()
 		{
-			npc.damage = 0;
-			npc.npcSlots = 3f;
-			npc.width = 172; //324
-			npc.height = 136; //216
-			npc.defense = 10;
-			npc.lifeMax = 5500000;
-			npc.boss = true;
-			npc.aiStyle = -1; //new
-			Main.npcFrameCount[npc.type] = 1; //new
-			aiType = -1; //new
-			animationType = 10; //new
-			npc.knockBackResist = 0f;
+			NPC.damage = 0;
+			NPC.npcSlots = 3f;
+			NPC.width = 172; //324
+			NPC.height = 136; //216
+			NPC.defense = 10;
+			NPC.lifeMax = 5500000;
+			NPC.boss = true;
+			NPC.aiStyle = -1; //new
+			Main.npcFrameCount[NPC.type] = 1; //new
+			AIType = -1; //new
+			AnimationType = 10; //new
+			NPC.knockBackResist = 0f;
 			//npc.alpha = 230;
-			npc.value = Item.buyPrice(0, 10, 0, 0);
-			for (int k = 0; k < npc.buffImmune.Length; k++)
+			NPC.value = Item.buyPrice(0, 10, 0, 0);
+			for (int k = 0; k < NPC.buffImmune.Length; k++)
 			{
-				npc.buffImmune[k] = true;
+				NPC.buffImmune[k] = true;
 			}
-			npc.lavaImmune = true;
-			npc.behindTiles = true;
-			npc.noGravity = true;
-			npc.noTileCollide = true;
-			npc.HitSound = SoundID.NPCHit4;
-			npc.DeathSound = SoundID.NPCDeath14;
-			music = mod.GetSoundSlot(SoundType.Music, "Sounds/Music/AndromedaOne");
-			npc.dontTakeDamage = false;
-			npc.netAlways = true;
+			NPC.lavaImmune = true;
+			NPC.behindTiles = true;
+			NPC.noGravity = true;
+			NPC.noTileCollide = true;
+			NPC.HitSound = SoundID.NPCHit4;
+			NPC.DeathSound = SoundID.NPCDeath14;
+			//music = mod.GetSoundSlot(SoundType.Music, "Sounds/Music/AndromedaOne");
+			NPC.dontTakeDamage = false;
+			NPC.netAlways = true;
+			NPC.DR_NERD(0.5f);
 		}
 		public override void AI()
 		{
-			CalValPlusGlobalNPC.androalive = npc.whoAmI;
-			Mod clamMod =
-				ModLoader.GetMod(
-					"CalamityMod");
-			clamMod.Call(ModContent.NPCType<Andromeda>(), 0.5f);
+			CalValPlusGlobalNPC.androalive = NPC.whoAmI;
 			//Bottom section Animation
 			if (framer >= 80)
             {
@@ -110,54 +116,131 @@ namespace CalValPlus.NPCs.Andromeda
 				wingdelay = 0;
 			}
 
+			//Vent sliding
+			if (invincibletimer < 601 && invincibletimer > 1)
+            {
+				ventbuffer = 520;
+            }
+			else
+            {
+				ventbuffer = 0;
+            }
+			/*if (invincibletimer < 601 && invincibletimer > 1 && venttimer >= 170 + ventbuffer)
+			{
+				venttimer--;
+			}*/
+				venttimer++;
+			if (venttimer < 20)
+            {
+				ventframe = 0;
+            }
+			else if (venttimer >= 10 && venttimer < 20)
+            {
+				ventframe = 1;
+            }
+			else if (venttimer >= 20 && venttimer < 30)
+			{
+				ventframe = 2;
+			}
+			else if (venttimer >= 30 && venttimer < 80 + ventbuffer)
+			{
+				ventframe = 3;
+			}
+			else if (venttimer >= 80 + ventbuffer && venttimer < 100 + ventbuffer)
+			{
+				ventframe = 2;
+			}
+			else if (venttimer >= 100 + ventbuffer && venttimer < 120 + ventbuffer)
+			{
+				ventframe = 1;
+			}
+			else if (venttimer >= 120 + ventbuffer)
+			{
+				ventframe = 0;
+			}
+			/*if (invincible == false && npc.life <= npc.lifeMax * 0.6f)
+            {
+				ventframe = 0;
+            }*/
+
 			//Spawn stationary turrets
 			if (statprobe)
 			{
+				dronespawn++;
 				/*NPC.NewNPC((int)npc.Center.X + 300, (int)npc.Center.Y - 30, mod.NPCType("ActiveCannon"), 0, 0f, 0f, 0f, 0f, 255);
 				NPC.NewNPC((int)npc.Center.X + 340, (int)npc.Center.Y - 30, mod.NPCType("ActiveCannon"), 0, 1f, 0f, 0f, 0f, 255);
 				NPC.NewNPC((int)npc.Center.X + 260, (int)npc.Center.Y - 30, mod.NPCType("ActiveCannon"), 0, 2f, 0f, 0f, 0f, 255);
 				NPC.NewNPC((int)npc.Center.X - 300, (int)npc.Center.Y - 30, mod.NPCType("ActiveCannon"), 0, 3f, 0f, 0f, 0f, 255);
 				NPC.NewNPC((int)npc.Center.X - 340, (int)npc.Center.Y - 30, mod.NPCType("ActiveCannon"), 0, 4f, 0f, 0f, 0f, 255);
 				NPC.NewNPC((int)npc.Center.X - 260, (int)npc.Center.Y - 30, mod.NPCType("ActiveCannon"), 0, 5f, 0f, 0f, 0f, 255);*/
-				NPC.NewNPC((int)npc.Center.X, (int)npc.Center.Y - 200, mod.NPCType("ShotgunDrone"), 0, 5f, 0f, 0f, 0f, 255);
-				NPC.NewNPC((int)npc.Center.X - 200, (int)npc.Center.Y, mod.NPCType("ShotgunDrone"), 0, 5f, 0f, 0f, 1f, 255);
-				NPC.NewNPC((int)npc.Center.X + 200, (int)npc.Center.Y, mod.NPCType("ShotgunDrone"), 0, 5f, 0f, 0f, 2f, 255);
-				NPC.NewNPC((int)npc.Center.X + 400, (int)npc.Center.Y - 300, mod.NPCType("MachineGunDrone"), 0, 5f, 0f, 0f, 0f, 255);
-				NPC.NewNPC((int)npc.Center.X + -400, (int)npc.Center.Y - 300, mod.NPCType("MachineGunDrone"), 0, 5f, 0f, 0f, 1f, 255);
-				statprobe = false;
+				if (dronespawn == 5)
+				{
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X - 357, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("ShotgunDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X - 357, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("ShotgunDrone").Type, 0, 5f, 0f, 0f, 1f, 255);
+				}
+				if (dronespawn == 35)
+                {
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + 357, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("MachineGunDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + 357, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("MachineGunDrone").Type, 0, 5f, 0f, 0f, 1f, 255);
+				}
+				if (dronespawn == 60)
+				{
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + 357, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("ShotgunDrone").Type, 0, 5f, 0f, 0f, 2f, 255);
+					statprobe = false;
+					dronespawn = 0;
+				}
 			}
 			//Setup phases
-			if (npc.life <= npc.lifeMax * 0.3f)
+			NPC.localAI[0] = 1f;
+			if (NPC.life <= NPC.lifeMax * 0.6f && !hasbeeninvincible)
 			{
-				npc.localAI[0] = 1f; //Change later
+				NPC.dontTakeDamage = true;
+				invincible = true;
+				hasbeeninvincible = true;
 			}
-			else
-			{
-				npc.localAI[0] = 1f;
-			}
+			if (invincible)
+            {
+				NPC.velocity *= 0.99f;
+				if (invincibletimer < 601)
+				{
+					dronepocalypse++;
+				}
+				invincibletimer++;
+				if (invincibletimer >= 1000)
+                {
+					NPC.dontTakeDamage = false;
+					invincible = false;
+					invincibletimer = 0;
+                }
+				if (invincibletimer == 2)
+                {
+					venttimer = 0;
+				}
+            }
+
 
 			//AI, juicy YuH coded AI
 
 			//Positioning for turrets
 			//Left mega cannon
 			Vector2 leftpos;
-			leftpos.X = npc.Center.X - 320;
-			leftpos.Y = npc.Center.Y + 600 - bottomoffset;
+			leftpos.X = NPC.Center.X - 320;
+			leftpos.Y = NPC.Center.Y + 600 - bottomoffset;
 
 			//Right mega cannon
 			Vector2 rightpos;
-			rightpos.X = npc.Center.X + 320;
-			rightpos.Y = npc.Center.Y + 600 - bottomoffset;
+			rightpos.X = NPC.Center.X + 320;
+			rightpos.Y = NPC.Center.Y + 600 - bottomoffset;
 
 			//Top right mega cannon
 			Vector2 toprightpos;
-			toprightpos.X = npc.Center.X + 130;
-			toprightpos.Y = npc.Center.Y - 495;
+			toprightpos.X = NPC.Center.X + 130;
+			toprightpos.Y = NPC.Center.Y - 495;
 
 			//Top left mega cannon
 			Vector2 topleftpos;
-			topleftpos.X = npc.Center.X - 130;
-			topleftpos.Y = npc.Center.Y - 495;
+			topleftpos.X = NPC.Center.X - 130;
+			topleftpos.Y = NPC.Center.Y - 495;
 
 			// Debug dusts
 
@@ -170,11 +253,82 @@ namespace CalValPlus.NPCs.Andromeda
 			Dust dustr;
 			dustr = Main.dust[Terraria.Dust.NewDust(rightpos, 0, 0, DustID.Shadowflame, 1f, 1f, 0, new Color(109, 255, 0), 2f)];*/
 
-			//Movement 
-			
-			if (npc.localAI[0] == 1f)
+			//Respawn drones
+			if (NPC.life >= NPC.lifeMax * 0.6f)
 			{
-				npc.TargetClosest();
+				dronerespawn++;
+				if (dronerespawn == 90)
+				{
+					venttimer = 0;
+				}
+				if (dronerespawn == 120 && NPC.CountNPCS(ModContent.NPCType<Minions.ShotgunDrone>()) < 12 && NPC.CountNPCS(ModContent.NPCType<Minions.KamikazeDrone>()) < 4 && NPC.CountNPCS(ModContent.NPCType<Minions.MachineGunDrone>()) < 4)
+                {
+					int spawnpos = 377;
+
+					int spawnchoice = Main.rand.Next(3);
+					if (spawnchoice == 0)
+					{
+						spawnpos = -377;
+					}
+					else
+					{
+						spawnpos = 377;
+					}
+					int dronechoice = Main.rand.Next(3);
+					if (dronechoice == 0)
+					{
+						NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + spawnpos, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("KamikazeDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+					}
+					else if (dronechoice == 1)
+					{
+						NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + spawnpos, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("MachineGunDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+					}
+					else
+					{
+						NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + spawnpos, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("ShotgunDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+					}
+				}
+			}
+			if (dronerespawn >= 150)
+			{
+				dronerespawn = 0;
+			}
+			if (dronepocalypse == 20)
+			{
+				SoundEngine.PlaySound(new Terraria.Audio.SoundStyle("CalValPlus/Sounds/PlasmaCasterFire"), NPC.Center);
+				int spawnpos = 377;
+
+				int spawnchoice = Main.rand.Next(3);
+				if (spawnchoice == 0)
+                {
+					spawnpos = -377;
+                }
+				else
+                {
+					spawnpos = 377;
+                }
+				int dronechoice = Main.rand.Next(3);
+				if (dronechoice == 0)
+				{
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + spawnpos, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("KamikazeDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+				}
+				else if (dronechoice == 1)
+				{
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + spawnpos, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("MachineGunDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+				}
+				else
+				{
+					NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X + spawnpos, (int)NPC.Center.Y + 14, Mod.Find<ModNPC>("ShotgunDrone").Type, 0, 5f, 0f, 0f, 0f, 255);
+				}
+				dronepocalypse = 0;
+			}
+
+			//Movement 
+
+			if (NPC.localAI[0] == 1f)
+			{
+				NPC.localAI[1]++;
+				NPC.TargetClosest();
 				/*float num893 = 0.45f;
 				float num894 = 7f;
 				npc.velocity.X += num893;
@@ -186,44 +340,46 @@ namespace CalValPlus.NPCs.Andromeda
 				{
 					npc.velocity.X = 0f - num894;
 				}*/
-				if (Main.player[npc.target].dead)
+				if (Main.player[NPC.target].dead)
                 {
-					npc.velocity.Y *= 1.1f;
+					NPC.ai[0] = -1;
+					NPC.active = false;
+					NPC.velocity.Y = 150f;
                 }
-				float playerY = Main.player[npc.target].position.Y - (npc.position.Y + npc.height);
-				float playerX = Main.player[npc.target].position.X - (npc.position.X + npc.width);
+				float playerY = Main.player[NPC.target].position.Y - (NPC.position.Y + NPC.height);
+				float playerX = Main.player[NPC.target].position.X - (NPC.position.X + NPC.width);
 				if (playerY < 50f)
 				{
-					npc.velocity.Y -= 0.1f;
+					NPC.velocity.Y -= 0.1f;
 				}
 				if (playerY > 50f)
 				{
-					npc.velocity.Y += 0.1f;
+					NPC.velocity.Y += 0.1f;
 				}
-				if (npc.velocity.Y > 2f)
+				if (NPC.velocity.Y > 2f)
 				{
-					npc.velocity.Y = 2f;
+					NPC.velocity.Y = 2f;
 				}
-				if (npc.velocity.Y < -4f)
+				if (NPC.velocity.Y < -4f)
 				{
-					npc.velocity.Y = -4f;
+					NPC.velocity.Y = -4f;
 				}
 
 				if (playerX < 0f)
 				{
-					npc.velocity.X -= 0.1f;
+					NPC.velocity.X -= 0.1f;
 				}
 				if (playerX > 0f)
 				{
-					npc.velocity.X += 0.1f;
+					NPC.velocity.X += 0.1f;
 				}
-				if (npc.velocity.X > 12f)
+				if (NPC.velocity.X > 12f)
 				{
-					npc.velocity.X = 12f + (playerX * 0.0001f);
+					NPC.velocity.X = 12f + (playerX * 0.0001f);
 				}
-				if (npc.velocity.X < -12f)
+				if (NPC.velocity.X < -12f)
 				{
-					npc.velocity.X = -12f + (playerX * 0.0001f);
+					NPC.velocity.X = -12f + (playerX * 0.0001f);
 				}
 
 				//npc.velocity.Y = 0;
@@ -231,49 +387,51 @@ namespace CalValPlus.NPCs.Andromeda
 
 				//Attacks
 
-				attacktimer++;
 				int attackbase = 180;
-				if (npc.life <= npc.lifeMax * 0.3f)
+				if (NPC.life <= NPC.lifeMax * 0.6f)
                 {
-					attacktimer++;
+					NPC.localAI[1]++;
                 }
-				Player player = Main.player[npc.target];
-				if (player.HasBuff(ModLoader.GetMod("CalamityMod").BuffType("AndromedaBuff")) || player.HasBuff(ModLoader.GetMod("CalamityMod").BuffType("AndromedaSmallBuff")))
+				Player player = Main.player[NPC.target];
+				if (player.HasBuff(ModLoader.GetMod("CalamityMod").Find<ModBuff>("AndromedaBuff").Type) || player.HasBuff(ModLoader.GetMod("CalamityMod").Find<ModBuff>("AndromedaSmallBuff").Type))
 				{
-					attacktimer++;
+					NPC.localAI[1]++;
 				}
 
-				if (attacktimer == attackbase || attacktimer == attackbase + 10 || attacktimer == attackbase + 20 || attacktimer == attackbase + 30 || attacktimer == attackbase + 40 || attacktimer == attackbase + 50 || attacktimer == attackbase + 60 || attacktimer == attackbase + 70 || attacktimer == attackbase + 80)
+				if (!invincible)
 				{
-					//Gauss blasts
-					Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/GaussWeaponFire"));
-					for (int x = 0; x < 4; x++)
-					{
-						Projectile.NewProjectile(rightpos.X, rightpos.Y, Main.rand.Next(-2, 2), Main.rand.Next(-2, 2), ModContent.ProjectileType<AndroMissile>(), 80, 0f, 255);
-						Projectile.NewProjectile(leftpos.X, leftpos.Y, Main.rand.Next(-2, 2), Main.rand.Next(-2, 2), ModContent.ProjectileType<AndroMissile>(), 80, 0f, 255);
-						//Projectile.NewProjectile(rightpos.X, rightpos.Y, 10, Main.rand.Next(-10, 10), ProjectileID.SaucerLaser, 80, 0f, 255);
-						//Projectile.NewProjectile(leftpos.X, leftpos.Y, -10, Main.rand.Next(-10, 10), ProjectileID.SaucerLaser, 80, 0f, 255);
-					}
-				}
-				if (attacktimer == attackbase * 2)
-				{
-						Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/PlasmaBolt"));
+					//if (npc.localAI[1] == attackbase || npc.localAI[1] == attackbase + 10 || npc.localAI[1] == attackbase + 20 || npc.localAI[1] == attackbase + 30 || npc.localAI[1] == attackbase + 40 || npc.localAI[1] == attackbase + 50 || npc.localAI[1] == attackbase + 60 || npc.localAI[1] == attackbase + 70 || npc.localAI[1] == attackbase + 80)
+						if (NPC.localAI[1] == attackbase || NPC.localAI[1] == attackbase + 40 || NPC.localAI[1] == attackbase + 80)
+						{
+						//Gauss blasts
+						SoundEngine.PlaySound(new Terraria.Audio.SoundStyle("CalValPlus/Sounds/GaussWeaponFire"), NPC.Center);
 						for (int x = 0; x < 4; x++)
 						{
-							Projectile.NewProjectile(leftpos.X, leftpos.Y, -20, Main.rand.Next(-20, 20), ModContent.ProjectileType<AndromedaDeathrayLeft>(), 80, 0f, 255);
-							Projectile.NewProjectile(rightpos.X, rightpos.Y, 20, Main.rand.Next(-20, 20), ModContent.ProjectileType<AndromedaDeathrayRight>(), 80, 0f, 255);
-							//Projectile.NewProjectile(rightpos.X, rightpos.Y, 10, Main.rand.Next(-10, 10), ProjectileID.SaucerLaser, 80, 0f, 255);
-							//Projectile.NewProjectile(leftpos.X, leftpos.Y, -10, Main.rand.Next(-10, 10), ProjectileID.SaucerLaser, 80, 0f, 255);
+							Projectile.NewProjectile(NPC.GetSource_FromAI(), rightpos.X, rightpos.Y, Main.rand.Next(-2, 2), Main.rand.Next(-2, 2), ModContent.ProjectileType<AndroMissile>(), 80, 0f, 255);
+							Projectile.NewProjectile(NPC.GetSource_FromAI(), leftpos.X, leftpos.Y, Main.rand.Next(-2, 2), Main.rand.Next(-2, 2), ModContent.ProjectileType<AndroMissile>(), 80, 0f, 255);
 						}
-					attacktimer = 0;
+					}
+					if (NPC.localAI[1] == attackbase * 3)
+					{
+						SoundEngine.PlaySound(new Terraria.Audio.SoundStyle("CalValPlus/Sounds/PlasmaBolt"), NPC.Center);
+						for (int x = 0; x < 4; x++)
+						{
+							Projectile.NewProjectile(NPC.GetSource_FromAI(), leftpos.X, leftpos.Y, -20, Main.rand.Next(-20, 20), ModContent.ProjectileType<AndromedaDeathrayLeft>(), 80, 0f, 255);
+							Projectile.NewProjectile(NPC.GetSource_FromAI(), rightpos.X, rightpos.Y, 20, Main.rand.Next(-20, 20), ModContent.ProjectileType<AndromedaDeathrayRight>(), 80, 0f, 255);
+						}
+					}
+				}
+				if (NPC.localAI[1] >= attackbase * 3)
+                {
+					NPC.localAI[1] = 0;
 				}
 
 				//Faces
-				if (attacktimer < attackbase)
+				if (NPC.localAI[1] < attackbase && !invincible)
                 {
 					face = 0;
                 }
-				else if (attacktimer >= attackbase)
+				else if (NPC.localAI[1] >= attackbase || invincible)
                 {
 					face = 3;
                 }
@@ -283,106 +441,118 @@ namespace CalValPlus.NPCs.Andromeda
                 }
 			}
 		}
-		public override bool PreDraw(SpriteBatch spriteBatch, Color drawColor)
+		public override bool CheckActive() { return false; }
+		public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
 		{
-			float androframe = 1f / (float)Main.npcFrameCount[npc.type];
+			float androframe = 1f / (float)Main.npcFrameCount[NPC.type];
 			
 			//Wings
 			//Top
-			Texture2D wingtexturetop = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingTop"));
-			Texture2D wingtexturetopglow = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingTopGlow"));
+			Texture2D wingtexturetop = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingTop").Value);
+			Texture2D wingtexturetopglow = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingTopGlow").Value);
 
-			int wingtexturetopheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (wingtexturetop.Height / 1);
+			int wingtexturetopheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexturetop.Height / 1);
 
 			Rectangle wingtexturetopsquare = new Rectangle(0, wingtexturetopheight, wingtexturetop.Width, wingtexturetop.Height / 1);
-			Color wingtexturetopalpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(wingtexturetop, npc.Center - Main.screenPosition + new Vector2(0f - 400, npc.gfxOffY - 40), wingtexturetopsquare, wingtexturetopalpha, npc.rotation + (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturetop, npc.Center - Main.screenPosition + new Vector2(0f + 400, npc.gfxOffY - 40), wingtexturetopsquare, wingtexturetopalpha, npc.rotation - (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
-			spriteBatch.Draw(wingtexturetopglow, npc.Center - Main.screenPosition + new Vector2(0f - 400, npc.gfxOffY - 40), wingtexturetopsquare, Color.White, npc.rotation + (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturetopglow, npc.Center - Main.screenPosition + new Vector2(0f + 400, npc.gfxOffY - 40), wingtexturetopsquare, Color.White, npc.rotation - (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			Color wingtexturetopalpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(wingtexturetop, NPC.Center - Main.screenPosition + new Vector2(0f - 400, NPC.gfxOffY - 40), wingtexturetopsquare, wingtexturetopalpha, NPC.rotation + (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturetop, NPC.Center - Main.screenPosition + new Vector2(0f + 400, NPC.gfxOffY - 40), wingtexturetopsquare, wingtexturetopalpha, NPC.rotation - (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(wingtexturetopglow, NPC.Center - Main.screenPosition + new Vector2(0f - 400, NPC.gfxOffY - 40), wingtexturetopsquare, Color.White, NPC.rotation + (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturetopglow, NPC.Center - Main.screenPosition + new Vector2(0f + 400, NPC.gfxOffY - 40), wingtexturetopsquare, Color.White, NPC.rotation - (wingrot * 0.015f), Utils.Size(wingtexturetopsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 			//Midle
-			Texture2D wingtexturemiddle = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingMiddle"));
-			Texture2D wingtexturemiddleglow = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingMiddleGlow"));
+			Texture2D wingtexturemiddle = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingMiddle").Value);
+			Texture2D wingtexturemiddleglow = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingMiddleGlow").Value);
 
-			int wingtexturemiddleheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (wingtexturemiddle.Height / 1);
+			int wingtexturemiddleheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexturemiddle.Height / 1);
 
 			Rectangle wingtexturemiddlesquare = new Rectangle(0, wingtexturemiddleheight, wingtexturemiddle.Width, wingtexturemiddle.Height / 1);
-			Color wingtexturemiddlealpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(wingtexturemiddle, npc.Center - Main.screenPosition + new Vector2(0f - 360, npc.gfxOffY - 20), wingtexturemiddlesquare, wingtexturemiddlealpha, npc.rotation + (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturemiddle, npc.Center - Main.screenPosition + new Vector2(0f + 360, npc.gfxOffY - 20), wingtexturemiddlesquare, wingtexturemiddlealpha, npc.rotation - (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, npc.scale, SpriteEffects.None, 0f);
-			spriteBatch.Draw(wingtexturemiddleglow, npc.Center - Main.screenPosition + new Vector2(0f - 360, npc.gfxOffY - 20), wingtexturemiddlesquare, Color.White, npc.rotation + (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturemiddleglow, npc.Center - Main.screenPosition + new Vector2(0f + 360, npc.gfxOffY - 20), wingtexturemiddlesquare, Color.White, npc.rotation - (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			Color wingtexturemiddlealpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(wingtexturemiddle, NPC.Center - Main.screenPosition + new Vector2(0f - 360, NPC.gfxOffY - 20), wingtexturemiddlesquare, wingtexturemiddlealpha, NPC.rotation + (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturemiddle, NPC.Center - Main.screenPosition + new Vector2(0f + 360, NPC.gfxOffY - 20), wingtexturemiddlesquare, wingtexturemiddlealpha, NPC.rotation - (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(wingtexturemiddleglow, NPC.Center - Main.screenPosition + new Vector2(0f - 360, NPC.gfxOffY - 20), wingtexturemiddlesquare, Color.White, NPC.rotation + (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturemiddleglow, NPC.Center - Main.screenPosition + new Vector2(0f + 360, NPC.gfxOffY - 20), wingtexturemiddlesquare, Color.White, NPC.rotation - (wingrot * 0.01f), Utils.Size(wingtexturemiddlesquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 			//Bottom
-			Texture2D wingtexturelower = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingLower"));
-			Texture2D wingtexturelowerglow = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingLowerGlow"));
+			Texture2D wingtexturelower = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingLower").Value);
+			Texture2D wingtexturelowerglow = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingLowerGlow").Value);
 
-			int wingtexturelowerheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (wingtexturelower.Height / 1);
+			int wingtexturelowerheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexturelower.Height / 1);
 
 			Rectangle wingtexturelowersquare = new Rectangle(0, wingtexturelowerheight, wingtexturelower.Width, wingtexturelower.Height / 1);
-			Color wingtextureloweralpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(wingtexturelower, npc.Center - Main.screenPosition + new Vector2(0f - 360, npc.gfxOffY), wingtexturelowersquare, wingtextureloweralpha, npc.rotation + (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturelower, npc.Center - Main.screenPosition + new Vector2(0f + 360, npc.gfxOffY), wingtexturelowersquare, wingtextureloweralpha, npc.rotation - (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, npc.scale, SpriteEffects.None, 0f);
-			spriteBatch.Draw(wingtexturelowerglow, npc.Center - Main.screenPosition + new Vector2(0f - 360, npc.gfxOffY), wingtexturelowersquare, Color.White, npc.rotation + (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturelowerglow, npc.Center - Main.screenPosition + new Vector2(0f + 360, npc.gfxOffY), wingtexturelowersquare, Color.White, npc.rotation - (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			Color wingtextureloweralpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(wingtexturelower, NPC.Center - Main.screenPosition + new Vector2(0f - 360, NPC.gfxOffY), wingtexturelowersquare, wingtextureloweralpha, NPC.rotation + (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturelower, NPC.Center - Main.screenPosition + new Vector2(0f + 360, NPC.gfxOffY), wingtexturelowersquare, wingtextureloweralpha, NPC.rotation - (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(wingtexturelowerglow, NPC.Center - Main.screenPosition + new Vector2(0f - 360, NPC.gfxOffY), wingtexturelowersquare, Color.White, NPC.rotation + (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturelowerglow, NPC.Center - Main.screenPosition + new Vector2(0f + 360, NPC.gfxOffY), wingtexturelowersquare, Color.White, NPC.rotation - (wingrot * 0.0075f), Utils.Size(wingtexturelowersquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 			//Curved
-			Texture2D wingtexturecurve = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingCurve"));
-			Texture2D wingtexturecurveglow = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaWingCurveGlow"));
+			Texture2D wingtexturecurve = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingCurve").Value);
+			Texture2D wingtexturecurveglow = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaWingCurveGlow").Value);
 
-			int wingtexturecurveheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (wingtexturecurve.Height / 1);
+			int wingtexturecurveheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexturecurve.Height / 1);
 
 			Rectangle wingtexturecurvesquare = new Rectangle(0, wingtexturecurveheight, wingtexturecurve.Width, wingtexturecurve.Height / 1);
-			Color wingtexturecurvealpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(wingtexturecurve, npc.Center - Main.screenPosition + new Vector2(0f - 340, npc.gfxOffY - 20), wingtexturecurvesquare, wingtexturecurvealpha, npc.rotation + (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturecurve, npc.Center - Main.screenPosition + new Vector2(0f + 340, npc.gfxOffY - 20), wingtexturecurvesquare, wingtexturecurvealpha, npc.rotation - (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, npc.scale, SpriteEffects.None, 0f);
-			spriteBatch.Draw(wingtexturecurveglow, npc.Center - Main.screenPosition + new Vector2(0f - 340, npc.gfxOffY - 20), wingtexturecurvesquare, Color.White, npc.rotation + (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(wingtexturecurveglow, npc.Center - Main.screenPosition + new Vector2(0f + 340, npc.gfxOffY - 20), wingtexturecurvesquare, Color.White, npc.rotation - (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			Color wingtexturecurvealpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(wingtexturecurve, NPC.Center - Main.screenPosition + new Vector2(0f - 340, NPC.gfxOffY - 20), wingtexturecurvesquare, wingtexturecurvealpha, NPC.rotation + (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturecurve, NPC.Center - Main.screenPosition + new Vector2(0f + 340, NPC.gfxOffY - 20), wingtexturecurvesquare, wingtexturecurvealpha, NPC.rotation - (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(wingtexturecurveglow, NPC.Center - Main.screenPosition + new Vector2(0f - 340, NPC.gfxOffY - 20), wingtexturecurvesquare, Color.White, NPC.rotation + (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(wingtexturecurveglow, NPC.Center - Main.screenPosition + new Vector2(0f + 340, NPC.gfxOffY - 20), wingtexturecurvesquare, Color.White, NPC.rotation - (wingrot * 0.0013f), Utils.Size(wingtexturecurvesquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 
 
 			//Top
-			Texture2D androbottom = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaBottom"));
+			Texture2D androbottom = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaBottom").Value);
 
-			int androbottomheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (androbottom.Height / 1);
+			int androbottomheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (androbottom.Height / 1);
 
 			Rectangle androbottomsquare = new Rectangle(0, androbottomheight, androbottom.Width, androbottom.Height / 1);
-			Color androbottomalpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(androbottom, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY + 320 + framer), androbottomsquare, androbottomalpha, npc.rotation, Utils.Size(androbottomsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			Color androbottomalpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(androbottom, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY + 320 + framer), androbottomsquare, androbottomalpha, NPC.rotation, Utils.Size(androbottomsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 
 			//Mega Busters
-			Texture2D guntexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/Minions/AndromedaGun"));
-			Texture2D gunglowtexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/Minions/AndromedaGunGlow"));
+			Texture2D guntexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/Minions/AndromedaGun").Value);
+			Texture2D gunglowtexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/Minions/AndromedaGunGlow").Value);
 
-			int gunheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (guntexture.Height / 1);
+			int gunheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (guntexture.Height / 1);
 
 			Rectangle gunsquare = new Rectangle(0, gunheight, guntexture.Width, guntexture.Height / 1);
-			spriteBatch.Draw(guntexture, npc.Center - Main.screenPosition + new Vector2(0f - 270, npc.gfxOffY + 220 + framer), gunsquare, wingtexturetopalpha, npc.rotation, Utils.Size(gunsquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(guntexture, npc.Center - Main.screenPosition + new Vector2(0f + 270, npc.gfxOffY + 220 + framer), gunsquare, wingtexturetopalpha, npc.rotation, Utils.Size(gunsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
-			spriteBatch.Draw(gunglowtexture, npc.Center - Main.screenPosition + new Vector2(0f - 270, npc.gfxOffY + 220 + framer), gunsquare, Color.White, npc.rotation, Utils.Size(gunsquare) / 2f, npc.scale, SpriteEffects.FlipHorizontally, 0f);
-			spriteBatch.Draw(gunglowtexture, npc.Center - Main.screenPosition + new Vector2(0f + 270, npc.gfxOffY + 220 + framer), gunsquare, Color.White, npc.rotation, Utils.Size(gunsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(guntexture, NPC.Center - Main.screenPosition + new Vector2(0f - 270, NPC.gfxOffY + 220 + framer), gunsquare, wingtexturetopalpha, NPC.rotation, Utils.Size(gunsquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(guntexture, NPC.Center - Main.screenPosition + new Vector2(0f + 270, NPC.gfxOffY + 220 + framer), gunsquare, wingtexturetopalpha, NPC.rotation, Utils.Size(gunsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(gunglowtexture, NPC.Center - Main.screenPosition + new Vector2(0f - 270, NPC.gfxOffY + 220 + framer), gunsquare, Color.White, NPC.rotation, Utils.Size(gunsquare) / 2f, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
+			spriteBatch.Draw(gunglowtexture, NPC.Center - Main.screenPosition + new Vector2(0f + 270, NPC.gfxOffY + 220 + framer), gunsquare, Color.White, NPC.rotation, Utils.Size(gunsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 
 			//Top
-			Texture2D androbottom2 = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaBottomGlow"));
+			Texture2D androbottom2 = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaBottomGlow").Value);
 
-			int androbottomheight2 = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (androbottom2.Height / 1);
+			int androbottomheight2 = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (androbottom2.Height / 1);
 
 			Rectangle androbottomsquare2 = new Rectangle(0, androbottomheight2, androbottom2.Width, androbottom2.Height / 1);
-			spriteBatch.Draw(androbottom2, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY + 320 + framer), androbottomsquare2, Color.White, npc.rotation, Utils.Size(androbottomsquare2) / 2f, npc.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(androbottom2, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY + 320 + framer), androbottomsquare2, Color.White, NPC.rotation, Utils.Size(androbottomsquare2) / 2f, NPC.scale, SpriteEffects.None, 0f);
 
 			//Top
-			Texture2D androtoper = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaTop"));
+			Texture2D androtoper = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaTop").Value);
 
-			int androtopheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (androtoper.Height / 1);
+			int androtopheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (androtoper.Height / 1);
 
 			Rectangle androtopsquare = new Rectangle(0, androtopheight, androtoper.Width, androtoper.Height / 1);
-			Color androtopalpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(androtoper, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY - 182), androtopsquare, androtopalpha, npc.rotation, Utils.Size(androtopsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			Color androtopalpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(androtoper, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY - 182), androtopsquare, androtopalpha, NPC.rotation, Utils.Size(androtopsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
+
+			//Vent
+			Texture2D venttexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/Minions/Vent").Value);
+
+			//int ventheight = (int)((float)(npc.frame.Y / npc.frame.Height) * ventframe) * (venttexture.Height / 4);
+
+			Rectangle ventsquare = venttexture.Frame(1, 4, 0, ventframe);
+			Vector2 ventorigin = new Vector2(venttexture.Width / 2f, venttexture.Height / 2f / 4f);
+			Color ventalpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(venttexture, NPC.Center - Main.screenPosition + new Vector2(0f - 374, NPC.gfxOffY), ventsquare, ventalpha, NPC.rotation, ventorigin, NPC.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(venttexture, NPC.Center - Main.screenPosition + new Vector2(0f + 374, NPC.gfxOffY), ventsquare, ventalpha, NPC.rotation, ventorigin, NPC.scale, SpriteEffects.FlipHorizontally, 0f);
 
 			//Top
-			Texture2D androtop = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/AndromedaTopGlow"));
+			Texture2D androtop = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/AndromedaTopGlow").Value);
 
-			int androheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (androtop.Height / 1);
+			int androheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (androtop.Height / 1);
 
 			Rectangle androsquare = new Rectangle(0, androheight, androtop.Width, androtop.Height / 1);
-			spriteBatch.Draw(androtop, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY - 182), androsquare, Color.White, npc.rotation, Utils.Size(androsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(androtop, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY - 182), androsquare, Color.White, NPC.rotation, Utils.Size(androsquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 			//Screen
 			/*Texture2D screentexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/Andromeda"));
 
@@ -393,40 +563,40 @@ namespace CalValPlus.NPCs.Andromeda
 
 			return true;
 		}
-		public override void PostDraw(SpriteBatch spriteBatch, Color drawColor)
+		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
 		{
-			float androframe = 1f / (float)Main.npcFrameCount[npc.type];
+			float androframe = 1f / (float)Main.npcFrameCount[NPC.type];
 			//Face
-			Texture2D facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/NeutralAlt"));
+			Texture2D facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/NeutralAlt").Value);
 			if (face == 1)
 			{
-				facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/Neutral"));
+				facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/Neutral").Value);
 			}
 			else if (face == 2)
 			{
-				facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/Cmon"));
+				facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/Cmon").Value);
 			}
 			else if (face == 3)
 			{
-				facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/Exclamation"));
+				facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/Exclamation").Value);
 			}
 			else if (face == 4)
 			{
-				facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/Cheeky"));
+				facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/Cheeky").Value);
 			}
 			else if (face == 5)
 			{
-				facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/Death"));
+				facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/Death").Value);
 			}
 			else
 			{
-				facetexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/FacialExpressions/NeutralAlt"));
+				facetexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/FacialExpressions/NeutralAlt").Value);
 			}
 
-			int facetexturenheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (facetexture.Height / 1);
+			int facetexturenheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (facetexture.Height / 1);
 
 			Rectangle facetexturesquare = new Rectangle(0, facetexturenheight, facetexture.Width, facetexture.Height / 1);
-			spriteBatch.Draw(facetexture, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY), facetexturesquare, Color.White, npc.rotation, Utils.Size(facetexturesquare) / 2f, npc.scale, SpriteEffects.None, 0f);
+			spriteBatch.Draw(facetexture, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY), facetexturesquare, Color.White, NPC.rotation, Utils.Size(facetexturesquare) / 2f, NPC.scale, SpriteEffects.None, 0f);
 
 			
 			/*Texture2D activetex = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/Minions/ActiveCannon"));
@@ -441,43 +611,87 @@ namespace CalValPlus.NPCs.Andromeda
 			spriteBatch.Draw(activetex, npc.Center - Main.screenPosition + new Vector2(0f - 340, npc.gfxOffY - 30), activetexsquare, drawColor, npc.rotation, Utils.Size(activetexsquare) / 2f, npc.scale, SpriteEffects.None, 0f);
 			spriteBatch.Draw(activetex, npc.Center - Main.screenPosition + new Vector2(0f - 360, npc.gfxOffY - 30), activetexsquare, drawColor, npc.rotation, Utils.Size(activetexsquare) / 2f, npc.scale, SpriteEffects.None, 0f);*/
 		}
+		public override void SendExtraAI(BinaryWriter writer)
+		{
+			writer.Write(framer);
+			writer.Write(charging);
+			writer.Write(bottomoffset);
+			writer.Write(face);
+			writer.Write(wingdelay);
+			writer.Write(venttimer);
+			writer.Write(ventframe);
+			writer.Write(dronespawn);
+			writer.Write(dronerespawn);
+			writer.Write(dronepocalypse);
+			writer.Write(invincibletimer);
+			writer.Write(ventbuffer);
+			writer.Write(wingdelayt);
+			writer.Write(wingup);
+			writer.Write(moveup);
+			writer.Write(statprobe);
+			writer.Write(invincible);
+			writer.Write(hasbeeninvincible);
+	}
+
+		public override void ReceiveExtraAI(BinaryReader reader)
+		{
+			wingdelayt = reader.ReadBoolean();
+			wingup = reader.ReadBoolean();
+			moveup = reader.ReadBoolean();
+			statprobe = reader.ReadBoolean();
+			invincible = reader.ReadBoolean();
+			hasbeeninvincible = reader.ReadBoolean();
+			framer = reader.ReadInt32();
+			charging = reader.ReadInt32();
+			bottomoffset = reader.ReadInt32();
+			face = reader.ReadInt32();
+			wingdelay = reader.ReadInt32();
+			wingrot = reader.ReadInt32();
+			venttimer = reader.ReadInt32();
+			ventframe = reader.ReadInt32();
+			dronespawn = reader.ReadInt32();
+			dronerespawn = reader.ReadInt32();
+			dronepocalypse = reader.ReadInt32();
+			invincibletimer = reader.ReadInt32();
+			ventbuffer = reader.ReadInt32();
+	}
 		public override void BossLoot(ref string name, ref int potionType)
 		{
 			Mod calam = ModLoader.GetMod("CalamityMod");
-			potionType = calam.ItemType("OmegaHealingPotion");
+			potionType = calam.Find<ModItem>("OmegaHealingPotion").Type;
 		}
-		public override void NPCLoot()
+		public override void OnKill()
 		{
 			Mod calam = ModLoader.GetMod("CalamityMod");
 			Mod calval = ModLoader.GetMod("CalValEX");
 			//Main.rand.Next(30, 41)
-			Item.NewItem((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height, calval.ItemType("AndroombaGBC"), 1);
-			Item.NewItem((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height, calam.ItemType("Baguette"), Main.rand.Next(30, 41));
+			Item.NewItem(NPC.GetSource_Death(), (int)NPC.position.X, (int)NPC.position.Y, NPC.width, NPC.height, calval.Find<ModItem>("AndroombaGBC").Type, 1);
+			Item.NewItem(NPC.GetSource_Death(), (int)NPC.position.Y, NPC.width, NPC.height, calam.Find<ModItem>("Baguette").Type, Main.rand.Next(30, 41));
 		}
 		public override void HitEffect(int hitDirection, double damage)
 		{
 			Vector2 gorespeed;
-			gorespeed.X = npc.velocity.X;
-			gorespeed.Y = npc.velocity.Y;
-			Vector2 tower = new Vector2(npc.Center.X + 30, npc.Center.Y - 300);
-			Vector2 bustergore = new Vector2(npc.Center.X - 180, npc.Center.Y + 200);
-			Vector2 bustergore2 = new Vector2(npc.Center.X - 80, npc.Center.Y - 180);
-			Vector2 undergore = new Vector2(npc.Center.X - 90, npc.Center.Y - 20);
-			Vector2 pillar = new Vector2(npc.Center.X + 10, npc.Center.Y - 95);
-			Vector2 towerdown = new Vector2(npc.Center.X - 20, npc.Center.Y + 80);
-			Vector2 grapple = new Vector2(npc.Center.X + 50, npc.Center.Y + 150);
-			if (npc.life <= 0)
+			gorespeed.X = NPC.velocity.X;
+			gorespeed.Y = NPC.velocity.Y;
+			Vector2 tower = new Vector2(NPC.Center.X + 30, NPC.Center.Y - 300);
+			Vector2 bustergore = new Vector2(NPC.Center.X - 180, NPC.Center.Y + 200);
+			Vector2 bustergore2 = new Vector2(NPC.Center.X - 80, NPC.Center.Y - 180);
+			Vector2 undergore = new Vector2(NPC.Center.X - 90, NPC.Center.Y - 20);
+			Vector2 pillar = new Vector2(NPC.Center.X + 10, NPC.Center.Y - 95);
+			Vector2 towerdown = new Vector2(NPC.Center.X - 20, NPC.Center.Y + 80);
+			Vector2 grapple = new Vector2(NPC.Center.X + 50, NPC.Center.Y + 150);
+			if (NPC.life <= 0)
 			{
-				Gore.NewGore(tower, gorespeed, mod.GetGoreSlot("Gores/Andromeda1"), 1f); //Tower
-				Gore.NewGore(bustergore, gorespeed, mod.GetGoreSlot("Gores/Andromeda2"), 1f); //Mega Buster
-				Gore.NewGore(bustergore2, gorespeed, mod.GetGoreSlot("Gores/Andromeda2"), 1f); //Mega Buster
-				Gore.NewGore(undergore, gorespeed, mod.GetGoreSlot("Gores/Andromeda3"), 1f); //Base next to screen
-				Gore.NewGore(towerdown, gorespeed, mod.GetGoreSlot("Gores/Andromeda4"), 1f); //Below tower
-				Gore.NewGore(towerdown, gorespeed, mod.GetGoreSlot("Gores/Andromeda4"), 1f); //Below tower
-				Gore.NewGore(pillar, gorespeed, mod.GetGoreSlot("Gores/Andromeda5"), 1f); //Small pillar
-				Gore.NewGore(towerdown, gorespeed, mod.GetGoreSlot("Gores/Andromeda6"), 1f); //Below tower chunk
-				Gore.NewGore(towerdown, gorespeed, mod.GetGoreSlot("Gores/Andromeda6"), 1f); //Below tower chunk
-				Gore.NewGore(grapple, gorespeed, mod.GetGoreSlot("Gores/Andromeda7"), 1f); //Lower grapple area
+				Gore.NewGore(NPC.GetSource_FromAI(),tower, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda1").Type, 1f); // Tower
+				Gore.NewGore(NPC.GetSource_FromAI(), bustergore, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda2").Type, 1f); //Cannons
+				Gore.NewGore(NPC.GetSource_FromAI(), bustergore2, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda2").Type, 1f); 
+				Gore.NewGore(NPC.GetSource_FromAI(), undergore, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda3").Type, 1f); //Base next to screen
+				Gore.NewGore(NPC.GetSource_FromAI(), towerdown, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda4").Type, 1f); //Below tower
+				Gore.NewGore(NPC.GetSource_FromAI(), towerdown, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda4").Type, 1f);
+				Gore.NewGore(NPC.GetSource_FromAI(), pillar, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda5").Type, 1f); // Small pillar
+				Gore.NewGore(NPC.GetSource_FromAI(), towerdown, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda6").Type, 1f); //Below tower chunks
+				Gore.NewGore(NPC.GetSource_FromAI(), towerdown, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda6").Type, 1f);
+				Gore.NewGore(NPC.GetSource_FromAI(), grapple, NPC.velocity, Mod.Find<ModGore>("Gores/Andromeda7").Type, 1f); //Lower grapple area
 			}
 		}
 	}

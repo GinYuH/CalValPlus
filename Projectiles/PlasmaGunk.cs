@@ -18,25 +18,25 @@ namespace CalValPlus.Projectiles
 		}
 		public override void SetDefaults()
 		{
-			projectile.width = 20;
-			projectile.height = 20;
-			projectile.timeLeft = 480;
-			projectile.tileCollide = false;
-			projectile.ignoreWater = false;
-			projectile.hostile = true;
+			Projectile.width = 20;
+			Projectile.height = 20;
+			Projectile.timeLeft = 480;
+			Projectile.tileCollide = false;
+			Projectile.ignoreWater = false;
+			Projectile.hostile = true;
 		}
 		public override void AI()
 		{
 			//110 is alto a type used by plasma weaponry
 			for (int dusttimer = 0; dusttimer < 2; dusttimer++)
 			{
-				Vector2 dustpos = projectile.position;
-				int dusty = Dust.NewDust(projectile.position, 1, 1, 107, 0f, 0f, 0, default, 1f);
+				Vector2 dustpos = Projectile.position;
+				int dusty = Dust.NewDust(Projectile.position, 1, 1, 107, 0f, 0f, 0, default, 1f);
 				Main.dust[dusty].noGravity = true;
 			}
-			if (projectile.velocity.Y <= 10f)
+			if (Projectile.velocity.Y <= 10f)
             {
-                projectile.velocity.Y += 0.15f;
+                Projectile.velocity.Y += 0.15f;
             }
 		}
 	}

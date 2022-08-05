@@ -20,30 +20,30 @@ namespace CalValPlus.NPCs.Andromeda.Minions
 		}
 		public override void SetDefaults()
 		{
-			npc.damage = 0;
-			npc.npcSlots = 0f;
-			npc.width = 68; //324
-			npc.height = 44; //216
-			npc.defense = 10;
-			npc.lifeMax = 2000;
-			npc.boss = true;
-			npc.aiStyle = -1; //new
-			Main.npcFrameCount[npc.type] = 1; //new
-			aiType = -1; //new
-			animationType = -1; //new
-			npc.knockBackResist = 0f;
-			npc.value = Item.buyPrice(0, 0, 0, 0);
-			for (int k = 0; k < npc.buffImmune.Length; k++)
+			NPC.damage = 0;
+			NPC.npcSlots = 0f;
+			NPC.width = 68; //324
+			NPC.height = 44; //216
+			NPC.defense = 10;
+			NPC.lifeMax = 2000;
+			NPC.boss = true;
+			NPC.aiStyle = -1; //new
+			Main.npcFrameCount[NPC.type] = 1; //new
+			AIType = -1; //new
+			AnimationType = -1; //new
+			NPC.knockBackResist = 0f;
+			NPC.value = Item.buyPrice(0, 0, 0, 0);
+			for (int k = 0; k < NPC.buffImmune.Length; k++)
 			{
-				npc.buffImmune[k] = true;
+				NPC.buffImmune[k] = true;
 			}
-			npc.lavaImmune = true;
-			npc.behindTiles = false;
-			npc.noGravity = true;
-			npc.noTileCollide = true;
-			npc.HitSound = SoundID.NPCHit4;
-			npc.DeathSound = SoundID.NPCDeath14;
-			npc.dontTakeDamage = false;
+			NPC.lavaImmune = true;
+			NPC.behindTiles = false;
+			NPC.noGravity = true;
+			NPC.noTileCollide = true;
+			NPC.HitSound = SoundID.NPCHit4;
+			NPC.DeathSound = SoundID.NPCDeath14;
+			NPC.dontTakeDamage = false;
 		}
 
 		int lasercounter = 0;
@@ -55,54 +55,54 @@ namespace CalValPlus.NPCs.Andromeda.Minions
 			//Vector2 positioning = new Vector2(npc.Center.X, npc.Center.Y);
 			//float xpos = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - positioning.X;
 			//float ypos = Main.npc[CalValPlusGlobalNPC.androalive].Center.Y - positioning.Y;
-			npc.position.Y = Main.npc[CalValPlusGlobalNPC.androalive].Center.Y - 30;
-			if (npc.ai[0] == 0f)
+			NPC.position.Y = Main.npc[CalValPlusGlobalNPC.androalive].Center.Y - 30;
+			if (NPC.ai[0] == 0f)
 			{
-				npc.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 300;
+				NPC.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 300;
 			}
-			if (npc.ai[0] == 1f)
+			if (NPC.ai[0] == 1f)
 			{
-				npc.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 340;
+				NPC.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 340;
 			}
-			if (npc.ai[0] == 2f)
+			if (NPC.ai[0] == 2f)
 			{
-				npc.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 260;
+				NPC.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X + 260;
 			}
-			if (npc.ai[0] == 3f)
+			if (NPC.ai[0] == 3f)
 			{
-				npc.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - 300;
+				NPC.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - 300;
 			}
-			if (npc.ai[0] == 4f)
+			if (NPC.ai[0] == 4f)
 			{
-				npc.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - 340;
+				NPC.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - 340;
 			}
-			if (npc.ai[0] == 5f)
+			if (NPC.ai[0] == 5f)
 			{
-				npc.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - 260;
+				NPC.position.X = Main.npc[CalValPlusGlobalNPC.androalive].Center.X - 260;
 			}
 
 			//Flippe
 
-			if (npc.ai[0] >= 3f)
+			if (NPC.ai[0] >= 3f)
             {
 				isleft = -1;
             }
 
 			//Lasers
 
-			if ((lasercounter == 180 && npc.ai[0] == 2f) || (lasercounter == 190 && npc.ai[0] == 0f) || (lasercounter == 200 && npc.ai[0] == 1f) || (lasercounter == 180 && npc.ai[0] == 5f) || (lasercounter == 190 && npc.ai[0] == 3f) || (lasercounter == 200 && npc.ai[0] == 4f))
+			if ((lasercounter == 180 && NPC.ai[0] == 2f) || (lasercounter == 190 && NPC.ai[0] == 0f) || (lasercounter == 200 && NPC.ai[0] == 1f) || (lasercounter == 180 && NPC.ai[0] == 5f) || (lasercounter == 190 && NPC.ai[0] == 3f) || (lasercounter == 200 && NPC.ai[0] == 4f))
             {
-				npc.TargetClosest();
-				if (npc.HasValidTarget && Main.netMode != NetmodeID.MultiplayerClient)
+				NPC.TargetClosest();
+				if (NPC.HasValidTarget && Main.netMode != NetmodeID.MultiplayerClient)
 				{
-					Vector2 position = npc.Center;
-					Vector2 targetPosition = Main.player[npc.target].Center;
+					Vector2 position = NPC.Center;
+					Vector2 targetPosition = Main.player[NPC.target].Center;
 					Vector2 direction = targetPosition - position;
 					direction.Normalize();
 					float speed = 10f;
 					int type = ProjectileID.MartianWalkerLaser;
-					int damage = npc.damage; 
-					Projectile.NewProjectile(position, direction * speed, type, damage, 0f, Main.myPlayer);
+					int damage = NPC.damage; 
+					Projectile.NewProjectile(NPC.GetSource_FromAI(), position, direction * speed, type, damage, 0f, Main.myPlayer);
 				}
 			}
 			if (lasercounter > 200)
@@ -111,18 +111,18 @@ namespace CalValPlus.NPCs.Andromeda.Minions
             }
 		}
 
-		public override void PostDraw(SpriteBatch spriteBatch, Color drawColor)
+		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
 		{
-			float androframe = 1f / (float)Main.npcFrameCount[npc.type];
+			float androframe = 1f / (float)Main.npcFrameCount[NPC.type];
 
 			//Wings
-			Texture2D wingtexture = (ModContent.GetTexture("CalValPlus/NPCs/Andromeda/Minions/ActiveCannon"));
+			Texture2D wingtexture = (ModContent.Request<Texture2D>("CalValPlus/NPCs/Andromeda/Minions/ActiveCannon").Value);
 
-			int wingtextureheight = (int)((float)(npc.frame.Y / npc.frame.Height) * androframe) * (wingtexture.Height / 1);
+			int wingtextureheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexture.Height / 1);
 
 			Rectangle wingtexturesquare = new Rectangle(0, wingtextureheight, wingtexture.Width, wingtexture.Height / 1);
-			Color wingtexturealpha = npc.GetAlpha(drawColor);
-			spriteBatch.Draw(wingtexture, npc.Center - Main.screenPosition + new Vector2(0f, npc.gfxOffY), wingtexturesquare, wingtexturealpha, npc.rotation, Utils.Size(wingtexturesquare) / 2f, npc.scale, isleft == -1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 4f);
+			Color wingtexturealpha = NPC.GetAlpha(drawColor);
+			spriteBatch.Draw(wingtexture, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY), wingtexturesquare, wingtexturealpha, NPC.rotation, Utils.Size(wingtexturesquare) / 2f, NPC.scale, isleft == -1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 4f);
 		}
 	}
 }

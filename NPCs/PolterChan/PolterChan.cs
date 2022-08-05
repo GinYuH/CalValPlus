@@ -20,84 +20,84 @@ namespace CalValPlus.NPCs.PolterChan
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Polter-Chan");
-            Main.npcFrameCount[npc.type] = 3;
+            Main.npcFrameCount[NPC.type] = 3;
         }
 
         public override void SetDefaults()
         {
 
-            npc.noGravity = true;
-            npc.lavaImmune = true;
-            npc.aiStyle = -1;
-            npc.npcSlots = 25f;
-            npc.lifeMax = 400000;
-            npc.damage = 0;
-            npc.HitSound = SoundID.NPCHit49;
-            npc.DeathSound = SoundID.NPCDeath51;
-            npc.knockBackResist = 0f;
-            npc.noTileCollide = true;
-			npc.width = 200;
-			npc.height = 200;
-			npc.boss = true;
+            NPC.noGravity = true;
+            NPC.lavaImmune = true;
+            NPC.aiStyle = -1;
+            NPC.npcSlots = 25f;
+            NPC.lifeMax = 400000;
+            NPC.damage = 0;
+            NPC.HitSound = SoundID.NPCHit49;
+            NPC.DeathSound = SoundID.NPCDeath51;
+            NPC.knockBackResist = 0f;
+            NPC.noTileCollide = true;
+			NPC.width = 200;
+			NPC.height = 200;
+			NPC.boss = true;
         }
 
         public override void AI()
         {
 			Mod clamMod = ModLoader.GetMod("CalamityMod");
-			if (npc.ai[0] == 0f)
+			if (NPC.ai[0] == 0f)
 			{
 				attack++;
 				second++;
-				if (npc.ai[2] == 0f)
+				if (NPC.ai[2] == 0f)
 				{
-					npc.TargetClosest();
-					if (npc.Center.X < Main.player[npc.target].Center.X)
+					NPC.TargetClosest();
+					if (NPC.Center.X < Main.player[NPC.target].Center.X)
 					{
-						npc.ai[2] = 1f;
+						NPC.ai[2] = 1f;
 					}
 					else
 					{
-						npc.ai[2] = -1f;
+						NPC.ai[2] = -1f;
 					}
 				}
-				npc.TargetClosest();
+				NPC.TargetClosest();
 				int num891 = 800;
-				float num892 = Math.Abs(npc.Center.X - Main.player[npc.target].Center.X);
-				if (npc.Center.X < Main.player[npc.target].Center.X && npc.ai[2] < 0f && num892 > (float)num891)
+				float num892 = Math.Abs(NPC.Center.X - Main.player[NPC.target].Center.X);
+				if (NPC.Center.X < Main.player[NPC.target].Center.X && NPC.ai[2] < 0f && num892 > (float)num891)
 				{
-					npc.ai[2] = 0f;
+					NPC.ai[2] = 0f;
 				}
-				if (npc.Center.X > Main.player[npc.target].Center.X && npc.ai[2] > 0f && num892 > (float)num891)
+				if (NPC.Center.X > Main.player[NPC.target].Center.X && NPC.ai[2] > 0f && num892 > (float)num891)
 				{
-					npc.ai[2] = 0f;
+					NPC.ai[2] = 0f;
 				}
 				float num893 = 0.45f;
 				float num894 = 7f;
-				npc.velocity.X += npc.ai[2] * num893;
-				if (npc.velocity.X > num894)
+				NPC.velocity.X += NPC.ai[2] * num893;
+				if (NPC.velocity.X > num894)
 				{
-					npc.velocity.X = num894;
+					NPC.velocity.X = num894;
 				}
-				if (npc.velocity.X < 0f - num894)
+				if (NPC.velocity.X < 0f - num894)
 				{
-					npc.velocity.X = 0f - num894;
+					NPC.velocity.X = 0f - num894;
 				}
-				float num895 = Main.player[npc.target].position.Y - (npc.position.Y + npc.height);
+				float num895 = Main.player[NPC.target].position.Y - (NPC.position.Y + NPC.height);
 				if (num895 < 150f)
 				{
-					npc.velocity.Y -= 0.2f;
+					NPC.velocity.Y -= 0.2f;
 				}
 				if (num895 > 200f)
 				{
-					npc.velocity.Y += 0.2f;
+					NPC.velocity.Y += 0.2f;
 				}
-				if (npc.velocity.Y > 8f)
+				if (NPC.velocity.Y > 8f)
 				{
-					npc.velocity.Y = 8f;
+					NPC.velocity.Y = 8f;
 				}
-				if (npc.velocity.Y < -8f)
+				if (NPC.velocity.Y < -8f)
 				{
-					npc.velocity.Y = -8f;
+					NPC.velocity.Y = -8f;
 				}
 				/*if ((num892 < 500f || npc.ai[3] < 0f) && npc.position.Y < Main.player[npc.target].position.Y)
 				{
@@ -137,13 +137,13 @@ namespace CalValPlus.NPCs.PolterChan
 				if (attack == 10)
                 {
 					angulartimer++;
-					Vector2 vector113 = new Vector2(npc.Center.X, npc.Center.Y);
+					Vector2 vector113 = new Vector2(NPC.Center.X, NPC.Center.Y);
 					angularval = -10 + (angulartimer / 20);
-					int poltl = Projectile.NewProjectile(vector113.X, vector113.Y, angularval, 5, clamMod.ProjectileType("PhantomBlast"), 42, 0f, Main.myPlayer);
-					int poltr = Projectile.NewProjectile(vector113.X, vector113.Y, -angularval, 5, clamMod.ProjectileType("PhantomBlast"), 42, 0f, Main.myPlayer);
+					int poltl = Projectile.NewProjectile(NPC.GetSource_FromAI(), vector113.X, vector113.Y, angularval, 5, clamMod.Find<ModProjectile>("PhantomBlast").Type, 42, 0f, Main.myPlayer);
+					int poltr = Projectile.NewProjectile(NPC.GetSource_FromAI(), vector113.X, vector113.Y, -angularval, 5, clamMod.Find<ModProjectile>("PhantomBlast").Type, 42, 0f, Main.myPlayer);
 					Main.projectile[poltl].timeLeft = 180;
 					Main.projectile[poltr].timeLeft = 180;
-					npc.netUpdate = true;
+					NPC.netUpdate = true;
 					if (angularval <= 0)
                     {
 						angulartimer = 0;
@@ -154,19 +154,19 @@ namespace CalValPlus.NPCs.PolterChan
                 {
 					int shotspacing = 0;
 					shotspacing = (Main.rand.Next(-2, 2));
-					float num897 = Main.player[npc.target].position.X + (float)Main.player[npc.target].width * 0.5f - npc.Center.X;
-					float num898 = Main.player[npc.target].Center.Y - npc.Center.Y;
+					float num897 = Main.player[NPC.target].position.X + (float)Main.player[NPC.target].width * 0.5f - NPC.Center.X;
+					float num898 = Main.player[NPC.target].Center.Y - NPC.Center.Y;
 					float num899 = (float)Math.Sqrt(num897 * num897 + num898 * num898);
 					float num900 = 6f;
 					num899 = num900 / num899;
 					num897 *= num899;
 					num898 *= num899;
-					int num901 = Projectile.NewProjectile(npc.Center.X, npc.Center.Y, num897 + shotspacing, num898, clamMod.ProjectileType("PhantomBlast2"), 42, 0f, Main.myPlayer);
+					int num901 = Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center.X, NPC.Center.Y, num897 + shotspacing, num898, clamMod.Find<ModProjectile>("PhantomBlast2").Type, 42, 0f, Main.myPlayer);
 					second = 0;
 				}
-				else if (npc.ai[3] < 0f)
+				else if (NPC.ai[3] < 0f)
 				{
-					npc.ai[3] += 1f;
+					NPC.ai[3] += 1f;
 				}
 				/*if (Main.netMode != 1)
 				{
@@ -177,26 +177,26 @@ namespace CalValPlus.NPCs.PolterChan
 					}
 				}*/
 			}
-			if (npc.ai[0] == -1f)
+			if (NPC.ai[0] == -1f)
 			{
-				npc.TargetClosest();
-				npc.ai[0] = 1;
-				npc.ai[1] = 0f;
-				npc.ai[2] = 0f;
-				npc.ai[3] = 0f;
+				NPC.TargetClosest();
+				NPC.ai[0] = 1;
+				NPC.ai[1] = 0f;
+				NPC.ai[2] = 0f;
+				NPC.ai[3] = 0f;
 			}
 		}
         public override void FindFrame(int frameHeight)
         {
-            npc.frameCounter += 0.15f;
-            npc.frameCounter %= Main.npcFrameCount[npc.type];
-            int frame = (int)npc.frameCounter;
-            npc.frame.Y = frame * frameHeight;
+            NPC.frameCounter += 0.15f;
+            NPC.frameCounter %= Main.npcFrameCount[NPC.type];
+            int frame = (int)NPC.frameCounter;
+            NPC.frame.Y = frame * frameHeight;
         }
-        public override void NPCLoot()
+        public override void OnKill()
         {
             Mod clamMod = ModLoader.GetMod("CalamityMod");
-            Item.NewItem((int)npc.position.X, (int)npc.position.Y, npc.width, npc.height, clamMod.ItemType("RuinousSoul"), 12, false, 0, false, false);
+            Item.NewItem(NPC.GetSource_Death(), (int)NPC.position.X, (int)NPC.position.Y, NPC.width, NPC.height, clamMod.Find<ModItem>("RuinousSoul").Type, 12, false, 0, false, false);
         }
     }
 }

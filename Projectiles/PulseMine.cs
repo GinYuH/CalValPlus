@@ -1,4 +1,5 @@
 ﻿using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Microsoft.Xna.Framework;
 using System;
@@ -18,30 +19,30 @@ namespace CalValPlus.Projectiles
 		}
 		public override void SetDefaults()
 		{
-			projectile.width = 20;
-			projectile.height = 20;
-			projectile.scale = 1.6f;
-			projectile.hostile = true;
-			projectile.timeLeft = 90;
-			projectile.tileCollide = false;
-			projectile.ignoreWater = false;
+			Projectile.width = 20;
+			Projectile.height = 20;
+			Projectile.scale = 1.6f;
+			Projectile.hostile = true;
+			Projectile.timeLeft = 90;
+			Projectile.tileCollide = false;
+			Projectile.ignoreWater = false;
 		}
 		public override void AI()
 		{
 			for (int dusttimer = 0; dusttimer < 2; dusttimer++)
 			{
-				Vector2 dustpos = projectile.position;
-				int dusty = Dust.NewDust(projectile.position, projectile.width, projectile.height, 27, 0f, 0f, 0, default, 1f);
+				Vector2 dustpos = Projectile.position;
+				int dusty = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, 27, 0f, 0f, 0, default, 1f);
 				Main.dust[dusty].noGravity = true;
 			}
 		}
 		public override void Kill(int timeLeft)
 		{
-			Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/LaserCannon"));
-			Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, -40, 0, mod.ProjectileType("PulseLaser"), 80, (int)projectile.knockBack, projectile.owner);
-			Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, 40, 0, mod.ProjectileType("PulseLaser"), 80, (int)projectile.knockBack, projectile.owner);
-			Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, 0, 40, mod.ProjectileType("PulseLaser"), 80, (int)projectile.knockBack, projectile.owner);
-			Projectile.NewProjectile(projectile.Center.X, projectile.Center.Y, 0, -40, mod.ProjectileType("PulseLaser"), 80, (int)projectile.knockBack, projectile.owner);
+			SoundEngine.PlaySound(new Terraria.Audio.SoundStyle("CalValPlus/Sounds/LaserCannon"), Projectile.Center);
+			Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.X, Projectile.Center.Y, -40, 0, Mod.Find<ModProjectile>("PulseLaser").Type, 80, (int)Projectile.knockBack, Projectile.owner);
+			Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.Y, 40, 0, Mod.Find<ModProjectile>("PulseLaser").Type, 80, (int)Projectile.knockBack, Projectile.owner);
+			Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.Y, 0, 40, Mod.Find<ModProjectile>("PulseLaser").Type, 80, (int)Projectile.knockBack, Projectile.owner);
+			Projectile.NewProjectile(Projectile.GetSource_Death(), Projectile.Center.Y, 0, -40, Mod.Find<ModProjectile>("PulseLaser").Type, 80, (int)Projectile.knockBack, Projectile.owner);
 		}
 	}
 }

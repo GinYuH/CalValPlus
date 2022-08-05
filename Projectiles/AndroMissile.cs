@@ -15,27 +15,27 @@ namespace CalValPlus.Projectiles
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Andromeda Homing Missile MK VI");
-			Main.projFrames[projectile.type] = 6;
+			Main.projFrames[Projectile.type] = 6;
 		}
 
 		public override void SetDefaults()
 		{
-			projectile.width = 20;
-			projectile.height = 20;
-			projectile.hostile = true;
-			projectile.penetrate = -1;
-			projectile.timeLeft = 180;
-			projectile.CloneDefaults(ProjectileID.SaucerMissile);
-			aiType = ProjectileID.SaucerMissile;
+			Projectile.width = 20;
+			Projectile.height = 20;
+			Projectile.hostile = true;
+			Projectile.penetrate = -1;
+			Projectile.timeLeft = 180;
+			Projectile.CloneDefaults(ProjectileID.SaucerMissile);
+			AIType = ProjectileID.SaucerMissile;
 		}
 
 		public override void AI()
         {
-			float speedX = projectile.velocity.X;
-			float speedY = projectile.velocity.Y;
+			float speedX = Projectile.velocity.X;
+			float speedY = Projectile.velocity.Y;
 			if (Math.Abs(speedX) <= 6f && Math.Abs(speedY) <= 6f)
 			{
-				projectile.velocity *= 1.01f;
+				Projectile.velocity *= 1.01f;
 			}
         }
 	}

@@ -17,19 +17,19 @@ namespace CalValPlus.Projectiles
 		}
 		public override void SetDefaults()
 		{
-			projectile.width = 16;
-			projectile.height = 16;
-			projectile.hostile = true;
-			projectile.timeLeft = 100;
-			projectile.tileCollide = false;
-			projectile.ignoreWater = true;
+			Projectile.width = 16;
+			Projectile.height = 16;
+			Projectile.hostile = true;
+			Projectile.timeLeft = 100;
+			Projectile.tileCollide = false;
+			Projectile.ignoreWater = true;
 		}
 		public override void AI()
 		{
 			for (int dusttimer = 0; dusttimer < 2; dusttimer++)
 			{
-				Vector2 dustpos = projectile.position;
-				int dusty = Dust.NewDust(projectile.position, 1, 1, 27, 0f, 0f, 0, default, 1f);
+				Vector2 dustpos = Projectile.position;
+				int dusty = Dust.NewDust(Projectile.position, 1, 1, 27, 0f, 0f, 0, default, 1f);
 				Main.dust[dusty].noGravity = true;
 			}
 		}
