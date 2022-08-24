@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using StructureHelper;
+//using StructureHelper;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
@@ -72,7 +72,7 @@ namespace CalValPlus.NPCs.OceanicScourge
 							}
 							if (placementOK)
 							{
-								success = Generator.GenerateStructure("NPCs/FrozenStrongholdChest", new Point16(i, j - 20), Mod);
+								//success = Generator.GenerateStructure("NPCs/FrozenStrongholdChest", new Point16(i, j - 20), Mod);
 							}
 						}
 

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using StructureHelper;
+//using StructureHelper;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -92,7 +92,7 @@ namespace CalValPlus
 								}
 								if (placementOK)
 								{
-									success = Generator.GenerateStructure("NPCs/FrozenStrongholdChest", new Point16(i, j - 20), Mod);
+									//success = Generator.GenerateStructure("NPCs/FrozenStrongholdChest", new Point16(i, j - 20), Mod);
 								}
 							}
 						
@@ -157,7 +157,7 @@ namespace CalValPlus
 							}
 							if (placementOK)
 							{
-								success = Generator.GenerateStructure("NPCs/WulfrumWorkshop", new Point16(i, j - 10), Mod);
+								//success = Generator.GenerateStructure("NPCs/WulfrumWorkshop", new Point16(i, j - 10), Mod);
 							}
 						}
 

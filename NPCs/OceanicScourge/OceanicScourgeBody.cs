@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using StructureHelper;
+//using StructureHelper;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
@@ -86,7 +86,7 @@ namespace CalValPlus.NPCs.OceanicScourge
 							}
 							if (placementOK)
 							{
-								success = Generator.GenerateStructure("NPCs/WulfrumWorkshop", new Point16(i, j - 10), Mod);
+								//success = Generator.GenerateStructure("NPCs/WulfrumWorkshop", new Point16(i, j - 10), Mod);
 							}
 						}
 
