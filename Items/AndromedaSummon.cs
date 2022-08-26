@@ -2,6 +2,8 @@
 using Terraria.ID;
 using Terraria.ModLoader;
 using CalValPlus.NPCs.Andromeda;
+using System;
+using CsvHelper.TypeConversion;
 
 namespace CalValPlus.Items
 {
@@ -15,20 +17,20 @@ namespace CalValPlus.Items
 		}
 		public override void SetDefaults()
 		{
-			item.width = 28;
-			item.height = 18;
-			item.maxStack = 1;
-			item.rare = 11;
-			item.useAnimation = 45;
-			item.useTime = 45;
-			item.useStyle = 4;
-			item.UseSound = SoundID.Item44;
-			item.consumable = false;
+			Item.width = 28;
+			Item.height = 18;
+			Item.maxStack = 1;
+			Item.rare = 11;
+			Item.useAnimation = 45;
+			Item.useTime = 45;
+			Item.useStyle = 4;
+			Item.UseSound = SoundID.Item44;
+			Item.consumable = false;
 		}
 
-		public override bool UseItem(Player player)
+		public override bool? UseItem(Player player)
 		{
-			Main.PlaySound(1, (int)player.position.X, (int)player.position.Y, 0);
+			Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, player.position);
 			if (Main.netMode != 1)
 			{
 				NPC.SpawnOnPlayer(player.whoAmI, (ModContent.NPCType<AndromedaStart>()));
@@ -45,21 +47,6 @@ namespace CalValPlus.Items
 			else
 			{
 				return true;
-			}
-		}
-
-		public override void AddRecipes()
-		{
-			Mod calmod = ModLoader.GetMod("CalamityMod");
-			{
-				ModRecipe recipe = new ModRecipe(mod);
-				recipe.AddIngredient(calmod.ItemType("DubiousPlating"), 5);
-				recipe.AddIngredient(calmod.ItemType("MysteriousCircuitry"), 5);
-				recipe.AddIngredient(calmod.ItemType("PowerCell"), 200);
-				recipe.AddIngredient(calmod.ItemType("HellcasterFragment"), 5);
-				recipe.AddTile(calmod.TileType("DraedonsForge"));
-				recipe.SetResult(this);
-				recipe.AddRecipe();
 			}
 		}
 	}

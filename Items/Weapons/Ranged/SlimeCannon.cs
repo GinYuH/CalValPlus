@@ -3,6 +3,7 @@ using Terraria.ID;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria.ModLoader;
+using CalValPlus.Projectiles;
 
 namespace CalValPlus.Items.Weapons.Ranged
 {
@@ -15,17 +16,17 @@ namespace CalValPlus.Items.Weapons.Ranged
 		}
 		public override void SetDefaults()
         {
-			item.damage = 10;
-			item.useTime = 16;
-			item.useAnimation = 16;
-			item.rare = 3;
-			item.value = 5000000;
-			item.shoot = mod.ProjectileType("GunkBlast");
-			item.autoReuse = true;
-			item.useTurn = true;
-			item.useStyle = 4;
-			item.shootSpeed = 40f;
-			item.UseSound = SoundID.Item111;
+			Item.damage = 10;
+			Item.useTime = 16;
+			Item.useAnimation = 16;
+			Item.rare = 3;
+			Item.value = 5000000;
+			Item.shoot = ModContent.ProjectileType<GunkBlast>();
+			Item.autoReuse = true;
+			Item.useTurn = true;
+			Item.useStyle = 4;
+			Item.shootSpeed = 40f;
+			Item.UseSound = SoundID.Item111;
 		}
 	}
 }

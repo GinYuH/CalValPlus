@@ -196,23 +196,9 @@ namespace CalValPlus.NPCs.JohnWulfrum
             }
         }
 
-        public static void AddItem(bool check, string mod, string item, int price, ref Chest shop, ref int nextSlot)
-        {
-            if (shop1)
-            {
-                Mod calamityMod = ModLoader.GetMod("CalamityMod");
-                shop.item[nextSlot].SetDefaults(ItemType<Items.JohnWulfrumSummon>());
-                shop.item[nextSlot].shopCustomPrice = Item.buyPrice(0, 10, 0, 0);
-                nextSlot++;
-                shop.item[nextSlot].SetDefaults(ItemType<Items.JohnWulfrumDoor>());
-                shop.item[nextSlot].shopCustomPrice = Item.buyPrice(299, 99, 99, 99);
-                nextSlot++;
-            }
-        }
-
         public override void SetupShop(Chest shop, ref int nextSlot)
         {
-            if (shop1)
+            /*if (shop1)
             {
                 Mod calamityMod = ModLoader.GetMod("CalamityMod");
                 shop.item[nextSlot].SetDefaults(ItemType<Items.JohnWulfrumSummon>());
@@ -221,7 +207,7 @@ namespace CalValPlus.NPCs.JohnWulfrum
                 shop.item[nextSlot].SetDefaults(ItemType<Items.JohnWulfrumDoor>());
                 shop.item[nextSlot].shopCustomPrice = Item.buyPrice(299, 99, 99, 99);
                 nextSlot++;
-            }
+            }*/
         }
 
         public override void TownNPCAttackStrength(ref int damage, ref float knockback)

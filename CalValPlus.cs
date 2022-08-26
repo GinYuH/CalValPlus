@@ -15,7 +15,8 @@ namespace CalValPlus
 		public override void PostSetupContent()
 		{
 			{
-				Mod bossChecklist = ModLoader.GetMod("BossChecklist");
+				Mod bossChecklist;
+				ModLoader.TryGetMod("BossChecklist", out bossChecklist);
 				if (bossChecklist != null)
 				{
 					bossChecklist.Call(new object[12]
@@ -26,7 +27,7 @@ namespace CalValPlus
 				this,
 				"John Wulfrum",
 				(Func<bool>)(() => CalValPlusWorld.downedJohnWulfrum),
-				ModContent.ItemType<Items.JohnWulfrumSummon>(),
+				ModContent.ItemType<Items.AndromedaSummon>(),
 				null,
 				new List<int>
 				{
@@ -35,7 +36,7 @@ namespace CalValPlus
 					ModLoader.GetMod("CalValEX").Find<ModItem>("WulfrumHelipack").Type,
 					ModLoader.GetMod("CalValEX").Find<ModItem>("WulfrumKeys").Type
 				},
-				$"Find a Wulfrum Workshop and find a way to open the [i:{ModContent.ItemType<Items.JohnWulfrumDoor>()}] or use a [i:{ModContent.ItemType<Items.JohnWulfrumSummon>()}]",
+				$"Find a Wulfrum Workshop and find a way to open the [i:{ModContent.ItemType<Items.AndromedaSummon>()}] or use a [i:{ModContent.ItemType<Items.AndromedaSummon>()}]",
 				"The maniacal tinkerer finally found a weak opponent",
 				null
 				});
