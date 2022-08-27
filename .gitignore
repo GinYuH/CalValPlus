@@ -4,7 +4,6 @@
 *.props
 *.targets
 *.props
-*.cs
 *.cache
 *.cache
 *.editorconfig
