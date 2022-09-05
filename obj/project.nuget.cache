@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "5lj7j6HovEkRv/iCWByU8IAObfTQaKaZr1SrXChyt/VuHpspKxa1CHmqCUeWeRj7uHQr4blKczOtT1MYConhdg==",
+  "dgSpecHash": "Ww6DoIaU0SV/Qx5nsYNA5Re1nT1R9x8bH2Cmf+l1qqCMZwP5vZaw60n+4ii+GflvFcO+SxR7j6kyvD/BxwU7rA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\hdnp2\\OneDrive\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\CalValPlus\\CalValPlus.csproj",
+  "projectFilePath": "C:\\Users\\hdnp2\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\CalValPlus\\CalValPlus.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\hdnp2\\.nuget\\packages\\tmodloader.codeassist\\0.1.2\\tmodloader.codeassist.0.1.2.nupkg.sha512"
+    "C:\\Users\\hdnp2\\.nuget\\packages\\tmodloader.codeassist\\0.1.5\\tmodloader.codeassist.0.1.5.nupkg.sha512"
   ],
   "logs": []
 }

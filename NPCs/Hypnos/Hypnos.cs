@@ -42,12 +42,21 @@ namespace CalValPlus.NPCs.Hypnos
             NPC.width = 208;
             NPC.height = 138;
             NPC.boss = true;
+            NPC.dontTakeDamage = true;
         }
 
         public override void AI()
         {
             if (!initialized)
             {
+            }
+            if (NPC.CountNPCS(ModContent.NPCType<HypnosPlug>()) <= 0)
+            {
+                NPC.dontTakeDamage = false;
+            }
+            else
+            {
+                NPC.dontTakeDamage = true;
             }
             switch (NPC.ai[0])
             {
@@ -73,9 +82,9 @@ namespace CalValPlus.NPCs.Hypnos
                         }
                         else if (NPC.ai[1] >= 20)
                         {
-                            for (int i = 0; i < 12; i++)
+                            for (int i = 0; i < 4; i++)
                             {
-                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<AergiaNeuron>(), 0, NPC.whoAmI, i);
+                                NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<HypnosPlug>(), 0, NPC.whoAmI, i);
                             }
                             for (int l = 0; l < 48; l++)
                             {
@@ -256,6 +265,11 @@ namespace CalValPlus.NPCs.Hypnos
 
         public override void OnKill()
         {
+        }
+
+        public override bool CheckActive()
+        {
+            return false;
         }
     }
 }
