@@ -115,7 +115,7 @@ namespace CalValPlus.NPCs.Hypnos
                         float hypy = hypnos.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
                         float idealx = MathHelper.Lerp(NPC.position.X, hypx, 0.4f);
                         float idealy = MathHelper.Lerp(NPC.position.Y, hypy, 0.4f);
-                        NPC.position = new Vector2(idealx, idealy);
+                        NPC.position = new Vector2((int)idealx, (int)idealy);
                         if (hypnos.ai[1] >= stop + 30 && hypnos.ai[1] < stop + 90)
                         {
                             NPC.ai[2]++;
@@ -231,45 +231,59 @@ namespace CalValPlus.NPCs.Hypnos
                         }
                     }
                     break;
-                case 5: //Neuron lightning gates
+                case 5: //Neuron lightning gates, 480 ticks
                     {
                         if (!p2)
                         {
-                            Vector2 idealpos = NPC.Center;
+                            if (hypnos.ai[1] < 460)
+                            {
+                                Vector2 idealpos = NPC.Center;
 
-                            double deg = 30 * NPC.ai[1];
-                            double rad = deg * (Math.PI / 180);
-                            double dist = 400;
-                            bool bottom = NPC.ai[1] <= 10 && NPC.ai[1] >= 8;
+                                double deg = 30 * NPC.ai[1];
+                                double rad = deg * (Math.PI / 180);
+                                double dist = 400;
+                                bool bottom = NPC.ai[1] <= 10 && NPC.ai[1] >= 8;
 
-                            if (!bottom)
-                            {
-                                NPC.ai[2]++;
+                                if (!bottom)
+                                {
+                                    NPC.ai[2]++;
+                                }
+                                if (NPC.ai[2] < (60 * NPC.ai[1]) + 80)
+                                {
+                                    idealpos.X = target.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
+                                    idealpos.Y = target.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
+                                    Vector2 distanceFromDestination = idealpos - NPC.Center;
+                                    CalamityUtils.SmoothMovement(NPC, 100, distanceFromDestination, 60, 1, true);
+                                }
+                                else if (NPC.ai[2] == (60 * NPC.ai[1]) + 80)
+                                {
+                                    idealpos.X = target.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
+                                    idealpos.Y = target.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
+                                    NPC.position = idealpos;
+                                }
+                                else if (NPC.ai[2] == (60 * NPC.ai[1]) + 81)
+                                {
+                                    Vector2 direction = target.Center - NPC.Center;
+                                    direction.Normalize();
+                                    NPC.velocity = direction * 20;
+                                }
+                                else if (NPC.ai[2] >= (60 * NPC.ai[1]) + 101)
+                                {
+                                    NPC.damage = 0;
+                                    NPC.Calamity().canBreakPlayerDefense = false;
+                                    NPC.ai[2] = 0;
+                                }
+                                else
+                                {
+                                    NPC.velocity *= 1.01f;
+                                    NPC.damage = 200;
+                                    NPC.Calamity().canBreakPlayerDefense = true;
+                                }
                             }
-                            if (NPC.ai[2] < (60 * NPC.ai[1]) + 80)
+                            if (hypnos.ai[1] > 478)
                             {
-                                idealpos.X = target.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
-                                idealpos.Y = target.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
-                                Vector2 distanceFromDestination = idealpos - NPC.Center;
-                                CalamityUtils.SmoothMovement(NPC, 100, distanceFromDestination, 60, 1, true);
-                            }
-                            else if (NPC.ai[2] == (60 * NPC.ai[1]) + 81)
-                            {
-                                Vector2 direction = target.Center - NPC.Center;
-                                direction.Normalize();
-                                NPC.velocity = direction * 20;
-                            }
-                            else if (NPC.ai[2] >= (60 * NPC.ai[1]) + 101)
-                            {
-                                NPC.damage = 0;
-                                NPC.Calamity().canBreakPlayerDefense = false;
-                                NPC.ai[2] = 0;
-                            }
-                            else
-                            {
-                                NPC.velocity *= 1.01f;
-                                NPC.damage = 200;
-                                NPC.Calamity().canBreakPlayerDefense = true;
+                                plug.ai[2] = 0;
+                                NPC.active = false;
                             }
                         }
                     }

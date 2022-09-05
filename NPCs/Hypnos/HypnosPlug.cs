@@ -97,13 +97,13 @@ namespace CalValPlus.NPCs.Hypnos
             }
 
             NPC.position = pluglocation;
-            if (!initialized)
+            if (NPC.ai[2] == 0)
             {
                 for (int i = 0; i < 3; i++)
                 {
                     NPC.NewNPC(NPC.GetSource_FromAI(), (int)NPC.Center.X, (int)NPC.Center.Y, ModContent.NPCType<AergiaNeuron>(), 0, hypnos.whoAmI, startneuron + i, 0, NPC.whoAmI);
                 }
-                initialized = true;
+                NPC.ai[2] = 1;
             }
         }
 
