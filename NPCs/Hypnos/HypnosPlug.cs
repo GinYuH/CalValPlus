@@ -32,6 +32,7 @@ namespace CalValPlus.NPCs.Hypnos
             DisplayName.SetDefault("XP-00 Hypnos Plug");
             Main.npcFrameCount[NPC.type] = 1;
             NPCID.Sets.TrailingMode[NPC.type] = 1;
+            NPCID.Sets.MustAlwaysDraw[NPC.type] = true;
         }
 
         public override void SetDefaults()
@@ -47,6 +48,7 @@ namespace CalValPlus.NPCs.Hypnos
             NPC.noTileCollide = true;
             NPC.width = 14;
             NPC.height = 14;
+            NPCID.Sets.MustAlwaysDraw[NPC.type] = true;
         }
 
         public override void AI()

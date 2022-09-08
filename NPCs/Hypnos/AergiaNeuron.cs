@@ -5,13 +5,16 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using static Terraria.ModLoader.ModContent;
 using CsvHelper.TypeConversion;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using CalamityMod;
 using IL.Terraria.Audio;
+using CalamityMod;
 using CalamityMod.World;
 using CalamityMod.Projectiles.Boss;
 using static Terraria.ModLoader.PlayerDrawLayer;
@@ -29,11 +32,16 @@ namespace CalValPlus.NPCs.Hypnos
         public float corite2 = 0;
         public float corite3 = 0;
         public float corite4 = 0;
+        public int offx;
+        public int offy;
         public static float lvf = 1.1f; //laser velocity factor
+        Vector2 destiny;
         NPC hypnos;
         NPC plug;
         float rottimer = 0;
         int redlaserproj = ProjectileType<AstralLaser>();
+        public PrimitiveTrail LightningDrawer;
+        public PrimitiveTrail LightningBackgroundDrawer;
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("XP-00 Hypnos Aergia Neuron");
@@ -59,6 +67,7 @@ namespace CalValPlus.NPCs.Hypnos
 
         public override void AI()
         {
+            NPCID.Sets.MustAlwaysDraw[NPC.type] = true;
             if (!initialized)
             {
                 hypnos = Main.npc[(int)NPC.ai[0]];
@@ -103,6 +112,7 @@ namespace CalValPlus.NPCs.Hypnos
                     break;
                 case 2: //Fan attack
                     {
+                        NPC.velocity = Vector2.Zero;
                         int stop = 60;
                         Vector2 velocity = target.Center - NPC.Center;
                         velocity.Normalize();
@@ -180,13 +190,11 @@ namespace CalValPlus.NPCs.Hypnos
                         }
                     }
                     break;
-                case 4: //Neuron charges
+                case 4: //Spinspinspin
                     {
+                        NPC.damage = 200;
+                        NPC.Calamity().canBreakPlayerDefense = true;
                         rottimer += 12f;
-                        Vector2 velocity = target.Center - NPC.Center;
-                        velocity.Normalize();
-                        velocity *= 9f;
-
                         double deg = 30 * NPC.ai[1] + rottimer;
                         double rad = deg * (Math.PI / 180);
                         double dist = 200;
@@ -203,6 +211,7 @@ namespace CalValPlus.NPCs.Hypnos
                             NPC.position.X = hypnos.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
                             NPC.position.Y = hypnos.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
                         }
+                        Vector2 playerspeed = target.velocity / 2;
 
                         NPC.ai[2]++;
                         int lasertimer = 60;
@@ -226,12 +235,12 @@ namespace CalValPlus.NPCs.Hypnos
                             direction.Normalize();
 
                             Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Volume - 0.1f }, NPC.Center);
-                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, direction * -10 * lvf, redlaserproj, 320, 0);
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, direction * -10 * lvf + playerspeed, redlaserproj, 320, 0);
                             NPC.ai[2] = 0;
                         }
                     }
                     break;
-                case 5: //Neuron lightning gates, 480 ticks
+                case 5: //Neuron charges, 480 ticks
                     {
                         if (!p2)
                         {
@@ -280,24 +289,292 @@ namespace CalValPlus.NPCs.Hypnos
                                     NPC.Calamity().canBreakPlayerDefense = true;
                                 }
                             }
-                            if (hypnos.ai[1] > 478)
-                            {
-                                plug.ai[2] = 0;
-                                NPC.active = false;
-                            }
                         }
                     }
                     break;
                 //Phase 2
-                case 6: //Rotation attack
+                case 6: //Neuron lightning gates
+                    {
+                        int barrierx = 1000;
+                        int barriery = 500;
+                        destiny = target.position;
+                        if (hypnos.ai[2] == 0)
+                        {
+                            if (NPC.ai[1] > 3)
+                            {
+                                offx = Main.rand.Next(-1200, 1201);
+                                offy = Main.rand.Next(-700, 701);
+                            }
+                            else
+                            {
+                                switch (NPC.ai[1])
+                                {
+                                    case 0:
+                                        offx = barrierx;
+                                        offy = barriery;
+                                        break;
+                                    case 1:
+                                        offx = -barrierx;
+                                        offy = barriery;
+                                        break;
+                                    case 2:
+                                        offx = -barrierx;
+                                        offy = -barriery;
+                                        break;
+                                    case 3:
+                                        offx = barrierx;
+                                        offy = -barriery;
+                                        break;
+                                }
+                            }
+                        }
+                        destiny.X = destiny.X + offx;
+                        destiny.Y = destiny.Y + offy;
+                        //Neurons briefly follow the player 
+                        if (hypnos.ai[2] < 30)
+                        {
+                            float idealx = MathHelper.Lerp(NPC.position.X, destiny.X, 0.1f);
+                            float idealy = MathHelper.Lerp(NPC.position.Y, destiny.Y, 0.1f);
+                            NPC.position = new Vector2(idealx, idealy);
+                        }
+                        //Normal neurons
+                        if (hypnos.ai[2] >= 120 && NPC.ai[1] >= 4)
+                        {
+                            NPC.velocity = Vector2.Zero;
+                            float nothing = 0;
+                            for (int i = 0; i < Main.maxNPCs; i++)
+                            {
+                                NPC nextneuron = Main.npc[i];
+                                if (nextneuron.type == ModContent.NPCType<AergiaNeuron>() && nextneuron.ai[1] == NPC.ai[1] + 1 && nextneuron.active)
+                                {
+                                    if (Collision.CheckAABBvLineCollision(target.getRect().TopLeft(), target.Size, NPC.Center, nextneuron.Center, 3f, ref nothing))
+                                    {
+                                        target.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(target.name + " felt 10 thousand volts."), NPC.damage, 0);
+                                    }
+                                }
+                            }
+                        }
+                        //Barrier neurons
+                        if (hypnos.ai[2] >= 60 && NPC.ai[1] < 4)
+                        {
+                            NPC.velocity = Vector2.Zero;
+                            float nothing = 0;
+                            for (int i = 0; i < Main.maxNPCs; i++)
+                            {
+                                NPC nextneuron = Main.npc[i];
+                                if (nextneuron.type == ModContent.NPCType<AergiaNeuron>() && nextneuron.ai[1] == NPC.ai[1] + 1 && NPC.ai[1] < 3 && nextneuron.active)
+                                {
+                                    if (Collision.CheckAABBvLineCollision(target.getRect().TopLeft(), target.Size, NPC.Center, nextneuron.Center, 3f, ref nothing))
+                                    {
+                                        target.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(target.name + " felt 10 thousand volts."), NPC.damage * 3, 0);
+                                    }
+                                }
+                                if (nextneuron.type == ModContent.NPCType<AergiaNeuron>() && NPC.ai[1] == 3 && nextneuron.ai[1] == 0 && nextneuron.active)
+                                {
+                                    if (Collision.CheckAABBvLineCollision(target.getRect().TopLeft(), target.Size, NPC.Center, nextneuron.Center, 3f, ref nothing))
+                                    {
+                                        target.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(target.name + " felt 10 thousand volts."), NPC.damage * 3, 0);
+                                    }
+                                }
+                            }
+
+                        }
+                        if (hypnos.ai[2] == 121)
+                        {
+                            Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Volume - 0.1f }, NPC.Center);
+                        }
+                    }
                     break;
-                case 7: //Predictive charge
+                case 7: //Rings
+                    {
+                        if (CalamityWorld.revenge)
+                        {
+                            //0 1 2  [3 4 5] 6 7 8 [9 10 11]
+                            if (NPC.ai[1] < 3 || (NPC.ai[1] > 5 && NPC.ai[1] < 9))
+                            {
+                                rottimer += 2f;
+                            }
+                            else
+                            {
+                                rottimer -= 2f;
+                            }
+
+                        }
+                        else
+                        {
+                            if (NPC.ai[1] < 6)
+                            {
+                                rottimer += 2f;
+                            }
+                            else
+                            {
+                                rottimer -= 2f;
+                            }
+                        }
+                        int spacing = CalamityWorld.revenge ? 120 : 60;
+                        double deg = spacing * NPC.ai[1] + rottimer;
+                        double rad = deg * (Math.PI / 180);
+                        int lasertimer = 60;
+                        if (CalamityWorld.revenge)
+                        {
+                            switch (NPC.ai[1])
+                            {
+                                case 0:
+                                case 1:
+                                case 2:
+                                    NPC.ai[3] = 200;
+                                    lasertimer = 110;
+                                    break;
+                                case 3:
+                                case 4:
+                                case 5:
+                                    NPC.ai[3] = 300;
+                                    lasertimer = 70;
+                                    break;
+                                case 6:
+                                case 7:
+                                case 8:
+                                    NPC.ai[3] = 400;
+                                    lasertimer = 50;
+                                    break;
+                                case 9:
+                                case 10:
+                                case 11:
+                                    NPC.ai[3] = 500;
+                                    lasertimer = 30;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            NPC.ai[3] = NPC.ai[1] < 6 ? 200 : 400;
+                            lasertimer = NPC.ai[1] < 6 ? 50 : 100;
+                        }
+                        if (hypnos.ai[1] < 60)
+                        {
+                            float hyposx = target.Center.X - (int)(Math.Cos(rad) * NPC.ai[3]) - NPC.width / 2;
+                            float hyposy = target.Center.Y - (int)(Math.Sin(rad) * NPC.ai[3]) - NPC.height / 2;
+                            float idealx = MathHelper.Lerp(NPC.position.X, hyposx, 0.8f);
+                            float idealy = MathHelper.Lerp(NPC.position.Y, hyposy, 0.8f);
+                            NPC.position = new Vector2(idealx, idealy);
+                        }
+                        else
+                        {
+                            NPC.position.X = target.Center.X - (int)(Math.Cos(rad) * NPC.ai[3]) - NPC.width / 2;
+                            NPC.position.Y = target.Center.Y - (int)(Math.Sin(rad) * NPC.ai[3]) - NPC.height / 2;
+                        }
+
+                        NPC.ai[2]++;
+
+                        if (Main.expertMode)
+                        {
+                            lasertimer -= 10;
+                        }
+                        if (CalamityWorld.revenge)
+                        {
+                            lasertimer -= 5;
+                        }
+                        if (CalamityWorld.death)
+                        {
+                            lasertimer -= 5;
+                        }
+                        if (NPC.ai[2] >= lasertimer)
+                        {
+                            Vector2 position = NPC.Center;
+                            Vector2 targetPosition = target.Center;
+                            Vector2 direction = targetPosition - position;
+                            direction.Normalize();
+
+                            Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Volume - 0.1f }, NPC.Center);
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, direction * 10 * lvf, redlaserproj, 320, 0);
+                            NPC.ai[2] = 0;
+                        }
+                    }
                     break;
-                case 8: //SWR Yukari attack
+                case 8: //Predictive charge
+                    {
+                        NPC.velocity = Vector2.Zero;
+                        rottimer += 12f;
+                        double deg = 30 * NPC.ai[1] + rottimer;
+                        double rad = deg * (Math.PI / 180);
+                        double dist = 200;
+                        if (CalamityWorld.revenge)
+                        {
+                            dist -= 30;
+                        }
+                        if (CalamityWorld.death)
+                        {
+                            dist -= 30;
+                        }
+                        if (hypnos.ai[1] < 60)
+                        {
+                            float hyposx = hypnos.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
+                            float hyposy = hypnos.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
+                            float idealx = MathHelper.Lerp(NPC.position.X, hyposx, 0.8f);
+                            float idealy = MathHelper.Lerp(NPC.position.Y, hyposy, 0.8f);
+                            NPC.position = new Vector2(idealx, idealy);
+                        }
+                        else
+                        {
+                            NPC.damage = 200;
+                            NPC.Calamity().canBreakPlayerDefense = true;
+                            NPC.position.X = hypnos.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
+                            NPC.position.Y = hypnos.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
+                        }
+                    }
                     break;
-                case 9: //Lightning wall
+                case 9: //SWR Yukari attack
+                    {
+                        rottimer = 0;
+                        int heightoffset = -400;
+                        int widthoffset = -800;
+                        int spacing = 100;
+                        int maxtimes = 3;
+                        if (CalamityWorld.death)
+                        {
+                            maxtimes++;
+                        }
+                        if (Main.expertMode)
+                        {
+                            maxtimes++;
+                        }
+                        maxtimes = 999;
+                        Vector2 hypos = new Vector2(target.Center.X + widthoffset, target.Center.Y + (NPC.ai[1] * spacing) + heightoffset);
+                        float idealx = MathHelper.Lerp(NPC.position.X, hypos.X, 0.4f);
+                        float idealy = MathHelper.Lerp(NPC.position.Y, hypos.Y, 0.4f);
+                        NPC.ai[2]++;
+
+                        if (NPC.ai[3] > maxtimes)
+                        {
+                            NPC.velocity.X = 0;
+                        }
+                        if (NPC.ai[2] >= 30 + NPC.ai[1] * 10 && NPC.ai[3] <= maxtimes)
+                        {
+                            NPC.damage = 200;
+                            NPC.Calamity().canBreakPlayerDefense = true;
+                            if (NPC.velocity.X < 35)
+                            {
+                                NPC.velocity.X += 0.4f;
+                            }
+                            if (NPC.position.X > target.position.X + target.width + 600)
+                            {
+                                NPC.damage = 0;
+                                NPC.Calamity().canBreakPlayerDefense = false;
+                                Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Volume - 0.2f, Pitch = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Pitch + 0.2f }, NPC.Center);
+                                NPC.ai[3]++;
+                                NPC.ai[2] = 0;
+                                NPC.position = new Vector2(idealx, idealy);
+                            }
+                        }
+                        else
+                        {
+                            NPC.position = new Vector2(idealx, idealy);
+                        }
+                    }
                     break;
-                case 10: //Vanish
+                case 10: //Lightning wall
+                    break;
+                case 11: //Vanish
                     break;
             }
             //This is copypasted Corite AI
@@ -399,7 +676,7 @@ namespace CalValPlus.NPCs.Hypnos
                         corite1 = 4f;
                         corite2 = 45f;
                         corite3 = 0f;
-                        NPC.ai[3] = 0f;
+                        corite4 = 0f;
                         NPC.velocity /= 2f;
                         NPC.netUpdate = true;
                     }
@@ -464,6 +741,7 @@ namespace CalValPlus.NPCs.Hypnos
                     NPC.active = false;
                 }
             }
+
         }
 
         public void ChangePhase(int phasenum, bool reset1 = true, bool reset2 = true, bool reset4 = true)
@@ -479,14 +757,109 @@ namespace CalValPlus.NPCs.Hypnos
             }
             afterimages = false;
         }
+
         public override void FindFrame(int frameHeight)
         {
         }
+
+        internal float WidthFunction(float completionRatio) 
+        {
+            float ratio = 0.9f;
+            if ((hypnos.ai[2] < 120 && hypnos.ai[0] == 6 && NPC.ai[1] >= 4) || (hypnos.ai[2] < 60 && hypnos.ai[0] == 6 && NPC.ai[1] < 4))
+            {
+                ratio = 0.2f;
+            }
+            else if (hypnos.ai[2] >= 60 && hypnos.ai[0] == 6 && NPC.ai[1] < 4)
+            {
+                ratio = 1.1f;
+            }
+            else
+            {
+                ratio = 0.9f;
+            }
+            return ratio;
+        }
+
+        internal float BackgroundWidthFunction(float completionRatio) => WidthFunction(completionRatio) * 4f;
+
+        public Color BackgroundColorFunction(float completionRatio) => Color.CornflowerBlue * 0.4f;
+
+        internal Color ColorFunction(float completionRatio)
+        {
+            Color baseColor1 = Color.Cyan;
+            Color baseColor2 = Color.Cyan;
+
+            if ((hypnos.ai[2] < 120 && hypnos.ai[0] == 6 && NPC.ai[1] >= 4) || (hypnos.ai[2] < 60 && hypnos.ai[0] == 6 && NPC.ai[1] < 4))
+            {
+                baseColor1 = baseColor2 = Color.Orchid;
+            }
+            else if (hypnos.ai[2] >= 60 && hypnos.ai[0] == 6 && NPC.ai[1] < 4)
+            {
+                baseColor1 = baseColor2 = Color.Orange;
+            }
+
+                float fadeToWhite = MathHelper.Lerp(0f, 0.65f, (float)Math.Sin(MathHelper.TwoPi * completionRatio + Main.GlobalTimeWrappedHourly * 4f) * 0.5f + 0.5f);
+            Color baseColor = Color.Lerp(baseColor1, Color.White, fadeToWhite);
+            Color color = Color.Lerp(baseColor, baseColor2, ((float)Math.Sin(MathHelper.Pi * completionRatio + Main.GlobalTimeWrappedHourly * 4f) * 0.5f + 0.5f) * 0.8f) * 0.65f;
+            color.A = 84;
+            return color;
+        }
+
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             DrawHypnos(spriteBatch, screenPos, drawColor);
             if (!p2)
-            drawchain(spriteBatch, screenPos, drawColor);
+                drawchain(spriteBatch, screenPos, drawColor);
+            if (LightningDrawer is null)
+                LightningDrawer = new PrimitiveTrail(WidthFunction, ColorFunction, PrimitiveTrail.RigidPointRetreivalFunction);
+            if (LightningBackgroundDrawer is null)
+                LightningBackgroundDrawer = new PrimitiveTrail(BackgroundWidthFunction, BackgroundColorFunction, PrimitiveTrail.RigidPointRetreivalFunction);
+
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC nextneuron = Main.npc[i];
+                if (nextneuron.active && nextneuron.type == ModContent.NPCType<AergiaNeuron>())
+                {
+                    if (hypnos.ai[0] == 6 && hypnos.ai[2] >= 40 + NPC.ai[1] * 6 && NPC.ai[1] < 11)
+                    {
+                        if (nextneuron.ai[1] == NPC.ai[1] + 1 && !(NPC.ai[1] == 3 && nextneuron.ai[1] == 4))
+                        {
+                            List<Vector2> points = AresTeslaOrb.DetermineElectricArcPoints(NPC.Center, nextneuron.Center, 250290787);
+                            LightningBackgroundDrawer.Draw(points, -Main.screenPosition, 290);
+                            LightningDrawer.Draw(points, -Main.screenPosition, 290);
+                        }
+
+                        if (NPC.ai[1] == 3 && nextneuron.ai[1] == 0)
+                        {
+                            List<Vector2> points = AresTeslaOrb.DetermineElectricArcPoints(NPC.Center, nextneuron.Center, 250290787);
+                            LightningBackgroundDrawer.Draw(points, -Main.screenPosition, 290);
+                            LightningDrawer.Draw(points, -Main.screenPosition, 290);
+
+                        }
+                    }
+                    if (hypnos.ai[0] == 8)
+                    {
+                        if ((nextneuron.ai[1] == NPC.ai[1] + 1 && NPC.ai[1] < 11) || (NPC.ai[1] == 11 && nextneuron.ai[1] == 0))
+                        {
+                            List<Vector2> points = AresTeslaOrb.DetermineElectricArcPoints(NPC.Center, nextneuron.Center, 250290787);
+                            LightningBackgroundDrawer.Draw(points, -Main.screenPosition, 290);
+                            LightningDrawer.Draw(points, -Main.screenPosition, 290);
+                        }
+                        if (NPC.ai[1] == 11 && nextneuron.ai[1] == 0)
+                        {
+                            List<Vector2> points = AresTeslaOrb.DetermineElectricArcPoints(NPC.Center, nextneuron.Center, 250290787);
+                            LightningBackgroundDrawer.Draw(points, -Main.screenPosition, 290);
+                            LightningDrawer.Draw(points, -Main.screenPosition, 290);
+                        }
+                    }
+                }
+            }
+            if ((NPC.ai[2] > (60 * NPC.ai[1]) + 10) && NPC.ai[0] == 5)
+            {
+                List<Vector2> points = AresTeslaOrb.DetermineElectricArcPoints(plug.Center, NPC.Center, 250290787);
+                LightningBackgroundDrawer.Draw(points, -Main.screenPosition, 290);
+                LightningDrawer.Draw(points, -Main.screenPosition, 290);
+            }
             return false;
         }
 
@@ -496,11 +869,14 @@ namespace CalValPlus.NPCs.Hypnos
             if (NPC.spriteDirection == 1)
                 spriteEffects = SpriteEffects.FlipHorizontally;
 
+            Color neurcolor = drawColor;
+
             Texture2D texture = TextureAssets.Npc[NPC.type].Value;
             if (p2)
             {
                 texture = ModContent.Request<Texture2D>("CalValPlus/NPCs/Hypnos/AergiaNeuron2").Value;
             }
+
             Vector2 origin = new Vector2((float)(texture.Width / 2), (float)(texture.Height / Main.npcFrameCount[NPC.type] / 2));
             Color white = Color.White;
             float colorLerpAmt = 0.5f;
@@ -524,7 +900,7 @@ namespace CalValPlus.NPCs.Hypnos
             Vector2 npcOffset = NPC.Center - screenPos;
             npcOffset -= new Vector2((float)texture.Width, (float)(texture.Height / Main.npcFrameCount[NPC.type])) * NPC.scale / 2f;
             npcOffset += origin * NPC.scale + new Vector2(0f, NPC.gfxOffY);
-            spriteBatch.Draw(texture, npcOffset, NPC.frame, NPC.GetAlpha(drawColor), NPC.rotation, origin, NPC.scale, spriteEffects, 0f);
+            spriteBatch.Draw(texture, npcOffset, NPC.frame, neurcolor, NPC.rotation, origin, NPC.scale, spriteEffects, 0f);
         }
 
         public void drawchain(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
@@ -570,17 +946,11 @@ namespace CalValPlus.NPCs.Hypnos
             Texture2D texture = Request<Texture2D>("CalValPlus/NPCs/Hypnos/HypnosPlugCable").Value; //change this accordingly to your chain texture
 
             Color chaincolor = drawColor;
-
             if ((NPC.ai[2] > (60 * NPC.ai[1]) + 10) && NPC.ai[0] == 5)
             {
-                chaincolor = new Color(drawColor.R, drawColor.G, drawColor.B, 20);
+                doIDraw = false;
             }
-            else
-            {
-                chaincolor = drawColor;
-            }
-
-            while (doIDraw)
+                while (doIDraw)
             {
                 float distance = (pluglocation - distToProj).Length();
                 if (distance < (texture.Height + 1))
@@ -590,9 +960,9 @@ namespace CalValPlus.NPCs.Hypnos
                 else if (!float.IsNaN(distance))
                 {
                     distToProj += NPC.DirectionTo(pluglocation) * texture.Height;
-                    spriteBatch.Draw(texture, distToProj - Main.screenPosition,
+                    Main.EntitySpriteDraw(texture, distToProj - Main.screenPosition,
                         new Rectangle(0, 0, texture.Width, texture.Height), chaincolor, projRotation,
-                        Utils.Size(texture) / 2f, 1f, SpriteEffects.None, 0.1f);
+                        Utils.Size(texture) / 2f, 1f, SpriteEffects.None, 0);
                 }
             }
         }
@@ -629,7 +999,7 @@ namespace CalValPlus.NPCs.Hypnos
                 Vector2 npcOffset = hypnos.Center - screenPos;
                 npcOffset -= new Vector2((float)texture.Width, (float)(texture.Height / Main.npcFrameCount[hypnos.type])) * hypnos.scale / 2f;
                 npcOffset += origin * hypnos.scale + new Vector2(0f, hypnos.gfxOffY);
-                spriteBatch.Draw(texture, npcOffset, hypnos.frame, hypnos.GetAlpha(drawColor), hypnos.rotation, origin, hypnos.scale, spriteEffects, 0f);
+                spriteBatch.Draw(texture, npcOffset, hypnos.frame, Lighting.GetColor((int)hypnos.position.X / 16, (int)hypnos.position.Y / 16), hypnos.rotation, origin, hypnos.scale, spriteEffects, 0f);
             }
         }
         public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
