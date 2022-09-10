@@ -8,5 +8,6 @@ namespace CalValPlus
     public class CalValPlusGlobalNPC : GlobalNPC
     {
         public static int androalive = -1;
+        public static int hypnos = -1;
     }
 }

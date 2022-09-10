@@ -362,7 +362,7 @@ namespace CalValPlus.NPCs.Andromeda.Minions
 			int wingtextureheight = (int)((float)(NPC.frame.Y / NPC.frame.Height) * androframe) * (wingtexture.Height / 8);
 
 			Rectangle wingtexturesquare = new Rectangle(0, wingtextureheight - 5, wingtexture.Width, wingtexture.Height / 8);
-			Color wingtexturealpha = (Main.npc[CalValPlusGlobalNPC.androalive].life <= Main.npc[CalValPlusGlobalNPC.androalive].lifeMax * 0.6) ? Color.Red : Color.White;
+			Color wingtexturealpha = Color.White;
 			spriteBatch.Draw(wingtexture, NPC.Center - Main.screenPosition + new Vector2(0f, NPC.gfxOffY - 1), wingtexturesquare, wingtexturealpha, NPC.rotation, Utils.Size(wingtexturesquare) / 2f, NPC.scale, NPC.direction == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0f);
 		}
 	}

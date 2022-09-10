@@ -1,38 +1,23 @@
-﻿using MonoMod.Cil;
-using System;
+﻿using System;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
-using static Terraria.ModLoader.ModContent;
-using CsvHelper.TypeConversion;
-using System.ComponentModel;
-using System.Diagnostics;
-using Microsoft.Xna.Framework.Graphics;
 using CalamityMod;
-using IL.Terraria.Audio;
-using CalamityMod.World;
-using CalamityMod.Projectiles.Boss;
-using static Terraria.ModLoader.PlayerDrawLayer;
-using CalamityMod.Items.Accessories;
 
 namespace CalValPlus.NPCs.Hypnos
 {
     internal class HypnosPlug : ModNPC
     {
         public bool initialized = false;
-        public bool afterimages = false;
-        public bool hypnosafter = false;
         NPC hypnos;
-        float rottimer = 0;
-        int redlaserproj = ProjectileType<AstralLaser>();
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("XP-00 Hypnos Plug");
             Main.npcFrameCount[NPC.type] = 1;
             NPCID.Sets.TrailingMode[NPC.type] = 1;
             NPCID.Sets.MustAlwaysDraw[NPC.type] = true;
+            this.HideFromBestiary();
         }
 
         public override void SetDefaults()
@@ -41,13 +26,17 @@ namespace CalValPlus.NPCs.Hypnos
             NPC.lavaImmune = true;
             NPC.aiStyle = -1;
             NPC.lifeMax = 20000;
-            NPC.damage = 0;
+            NPC.LifeMaxNERB(250000, 328125);
+            double HPBoost = CalamityConfig.Instance.BossHealthBoost * 0.01;
+            NPC.lifeMax += (int)(NPC.lifeMax * HPBoost);
+            NPC.damage = 1;
             NPC.HitSound = SoundID.NPCHit4;
             NPC.DeathSound = SoundID.Item14;
             NPC.knockBackResist = 0f;
             NPC.noTileCollide = true;
             NPC.width = 14;
             NPC.height = 14;
+            NPC.defense = 20;
             NPCID.Sets.MustAlwaysDraw[NPC.type] = true;
         }
 
@@ -61,6 +50,7 @@ namespace CalValPlus.NPCs.Hypnos
             {
                 NPC.active = false;
             }
+            NPC.damage = 0;
 
             int heighoffset = 20;
             int heighoffsetin = 30;
@@ -108,23 +98,10 @@ namespace CalValPlus.NPCs.Hypnos
                 NPC.ai[2] = 1;
             }
         }
-
-        public void ChangePhase(int phasenum, bool reset1 = true, bool reset2 = true, bool reset3 = true)
+        public override void ScaleExpertStats(int numPlayers, float bossLifeScale)
         {
-            NPC.ai[0] = phasenum;
-            if (reset1)
-            {
-                NPC.ai[1] = 0;
-            }
-            if (reset2)
-            {
-                NPC.ai[2] = 0;
-            }
-            if (reset3)
-            {
-                NPC.Calamity().newAI[3] = 0;
-            }
-            afterimages = false;
+            NPC.lifeMax = (int)(NPC.lifeMax * 0.8f * bossLifeScale);
+            NPC.damage = (int)(NPC.damage * NPC.GetExpertDamageMultiplier());
         }
 
         public override bool CheckActive()
