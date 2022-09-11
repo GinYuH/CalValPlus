@@ -21,6 +21,7 @@ namespace CalValPlus.NPCs.Hypnos
         public bool afterimages = false;
         public bool hypnosafter = false;
         public bool p2 = false;
+        public bool enraged = false;
 
         public float corite1 = 0;
         public float corite2 = 0;
@@ -36,6 +37,8 @@ namespace CalValPlus.NPCs.Hypnos
 
         NPC hypnos;
         NPC plug;
+
+        public Particle ring;
 
         public PrimitiveTrail LightningDrawer;
         public PrimitiveTrail LightningBackgroundDrawer;
@@ -89,6 +92,7 @@ namespace CalValPlus.NPCs.Hypnos
             }
             //I'm keeping NPC.ai[0] consistent with Hypnos to reduce confusion
             NPC.ai[0] = hypnos.ai[0];
+            enraged = hypnos.ModNPC<Hypnos>().enraged;
             Player target = Main.player[hypnos.target];
             if (!plug.active && plug.type == ModContent.NPCType<HypnosPlug>())
             {
@@ -107,6 +111,11 @@ namespace CalValPlus.NPCs.Hypnos
                 lvf = 1;
             }
             SmokeDrawer.ParticleSpawnRate = 9999999;
+            if (ring != null)
+            {
+                ring.Scale *= 1.1f;
+                ring.Time += 1;
+            }
             if (hypnos.ModNPC<Hypnos>().ragetimer > 0 && hypnos.ai[0] != 8)
             {
                 SmokeDrawer.ParticleSpawnRate = 12;
@@ -270,6 +279,15 @@ namespace CalValPlus.NPCs.Hypnos
                         double rad = deg * (Math.PI / 180);
                         double dist = 400;
                         bool bottom = NPC.ai[1] <= 10 && NPC.ai[1] >= 8;
+                        int chargespeed = 20;
+                        if (CalamityWorld.death)
+                        {
+                            chargespeed += 5;
+                        }
+                        if (CalamityWorld.revenge)
+                        {
+                            chargespeed += 3;
+                        }
 
                         if (!bottom)
                         {
@@ -292,7 +310,7 @@ namespace CalValPlus.NPCs.Hypnos
                         {
                             Vector2 direction = target.Center - NPC.Center;
                             direction.Normalize();
-                            NPC.velocity = direction * 20;
+                            NPC.velocity = direction * chargespeed;
                         }
                         else if (NPC.ai[2] >= (60 * NPC.ai[1]) + 101)
                         {
@@ -318,8 +336,16 @@ namespace CalValPlus.NPCs.Hypnos
                         {
                             if (NPC.ai[1] > 3)
                             {
-                                offx = Main.rand.Next(-1200, 1201);
-                                offy = Main.rand.Next(-700, 701);
+                                if (enraged)
+                                {
+                                    offx = Main.rand.Next(-1500, 1501);
+                                    offy = Main.rand.Next(-1000, 1001);
+                                }
+                                else
+                                {
+                                    offx = Main.rand.Next(-1200, 1201);
+                                    offy = Main.rand.Next(-700, 701);
+                                }
                             }
                             else
                             {
@@ -498,6 +524,10 @@ namespace CalValPlus.NPCs.Hypnos
                         {
                             lasertimer -= 5;
                         }
+                        if (enraged)
+                        {
+                            lasertimer -= 5;
+                        }    
                         if (NPC.ai[2] >= lasertimer)
                         {
                             Vector2 position = NPC.Center;
@@ -541,25 +571,58 @@ namespace CalValPlus.NPCs.Hypnos
                             NPC.position.X = hypnos.Center.X - (int)(Math.Cos(rad) * dist) - NPC.width / 2;
                             NPC.position.Y = hypnos.Center.Y - (int)(Math.Sin(rad) * dist) - NPC.height / 2;
                         }
+                        if (NPC.ai[2] == 0)
+                        {
+                            NPC.ai[3] = Main.rand.Next(20, 120);
+                        }
+                        NPC.ai[2]++;
+                        if (NPC.ai[2] >= NPC.ai[3] && CalamityWorld.revenge)
+                        {
+                            Vector2 position = NPC.Center;
+                            Vector2 targetPosition = hypnos.Center;
+                            Vector2 direction = targetPosition - position;
+                            direction.Normalize();
+
+                            Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Volume - 0.1f }, NPC.Center);
+                            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, direction * 15 * lvf, ModContent.ProjectileType<RedExoPulseLaser>(), laserdamage, 0);
+                            NPC.ai[2] = 0;
+                        }
                     }
                     break;
                 case 9: //SWR Yukari attack
                     {
                         rottimer = 0;
                         int heightoffset = -400;
-                        int widthoffset = -800;
                         int spacing = 100;
                         int maxtimes = 3;
+                        int maxspeed = CalamityWorld.death ? 20 : 35;
                         if (CalamityWorld.death)
                         {
                             maxtimes++;
+                            if (NPC.ai[2] == 0)
+                            {
+                                if (Main.rand.Next(2) == 0)
+                                {
+                                    NPC.Calamity().newAI[0] = 800;
+                                    NPC.velocity = Vector2.Zero;
+                                }
+                                else
+                                {
+                                    NPC.Calamity().newAI[0] = -800;
+                                    NPC.velocity = Vector2.Zero;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            NPC.Calamity().newAI[0] = -800;
                         }
                         if (Main.expertMode)
                         {
                             maxtimes++;
                         }
                         maxtimes = 999;
-                        Vector2 hypos = new Vector2(target.Center.X + widthoffset, target.Center.Y + (NPC.ai[1] * spacing) + heightoffset);
+                        Vector2 hypos = new Vector2(target.Center.X + NPC.Calamity().newAI[0], target.Center.Y + (NPC.ai[1] * spacing) + heightoffset);
                         float idealx = MathHelper.Lerp(NPC.position.X, hypos.X, 0.4f);
                         float idealy = MathHelper.Lerp(NPC.position.Y, hypos.Y, 0.4f);
                         NPC.ai[2]++;
@@ -573,17 +636,24 @@ namespace CalValPlus.NPCs.Hypnos
                             NPC.damage = 200;
                             NPC.Calamity().canBreakPlayerDefense = true;
                             afterimages = true;
-                            if (NPC.velocity.X < 35)
+                            if (NPC.velocity.X > -maxspeed && NPC.Calamity().newAI[0] == 800)
                             {
-                                NPC.velocity.X += 0.4f;
+                                NPC.velocity.X -= CalamityWorld.death ? 0.3f : 0.4f;
                             }
-                            if (NPC.position.X > target.position.X + target.width + 600)
+                            if (NPC.velocity.X < maxspeed && NPC.Calamity().newAI[0] == -800)
+                            {
+                                NPC.velocity.X += 0.3f;
+                            }
+                            if ((NPC.position.X > target.position.X + target.width + 600 && NPC.Calamity().newAI[0] == -800) || (NPC.position.X < target.position.X + target.width - 600 && NPC.Calamity().newAI[0] == 800))
                             {
                                 NPC.damage = 0;
                                 NPC.Calamity().canBreakPlayerDefense = false;
                                 Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Volume - 0.2f, Pitch = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Pitch + 0.2f }, NPC.Center);
                                 NPC.ai[3]++;
                                 NPC.ai[2] = 0;
+                                Color ringcolor = hypnos.ModNPC<Hypnos>().ragetimer > 0 ? Color.Red * 1.2f : Color.Pink * 0.6f;
+                                ring = new BloomRing(NPC.Center, Vector2.Zero, ringcolor, NPC.scale * 0.4f, 30);
+                                GeneralParticleHandler.SpawnParticle(ring);
                                 NPC.position = new Vector2(idealx, idealy);
                             }
                         }
@@ -605,9 +675,15 @@ namespace CalValPlus.NPCs.Hypnos
                             double dist = 300;
                             bool bottom = NPC.ai[1] <= 10 && NPC.ai[1] >= 8;
                             int laseramt = 7;
+                            int freq = 65;
                             if (CalamityMod.World.CalamityWorld.death)
                             {
                                 laseramt++;
+                                freq -= 5;
+                            }
+                            if (CalamityWorld.revenge)
+                            {
+                                freq -= 5;
                             }
                             if (Main.expertMode)
                             {
@@ -638,6 +714,59 @@ namespace CalValPlus.NPCs.Hypnos
                     }
                     break;
                 case 11: //Vanish
+                    {
+                        NPC.damage = 200;
+                        NPC.Calamity().canBreakPlayerDefense = true;
+                        int maxdist = 900;
+                        int spinfactor = enraged ? 9 : 6;
+                        rottimer++;
+                        if (enraged)
+                        {
+                            rottimer++;
+                        }
+                        double deg = 30 * NPC.ai[1] + rottimer;
+                        double rad = deg * (Math.PI / 180);
+                        NPC.ai[3] = maxdist - NPC.ai[2];
+                        if (hypnos.ai[2] > 60)
+                        {
+                            NPC.ai[2] += spinfactor + (NPC.ai[2] / 200);
+                        }
+                        float hyposx = destiny.X - (int)(Math.Cos(rad) * NPC.ai[3]) - NPC.width / 2;
+                        float hyposy = destiny.Y - (int)(Math.Sin(rad) * NPC.ai[3]) - NPC.height / 2;
+                        float idealx = MathHelper.Lerp(NPC.position.X, hyposx, 0.8f);
+                        float idealy = MathHelper.Lerp(NPC.position.Y, hyposy, 0.8f);
+                        NPC.position = new Vector2(idealx, idealy);
+                        if (hypnos.ai[2] <= 60)
+                        {
+                            destiny.X = target.Center.X - NPC.width / 2;
+                            destiny.Y = target.Center.Y - NPC.height / 2;
+                        }
+                        if (NPC.ai[2] >= maxdist)
+                        {                            
+                            if (NPC.ai[1] == 0)
+                            {
+                                Terraria.Audio.SoundEngine.PlaySound(CalamityMod.Sounds.CommonCalamitySounds.ELRFireSound with { Volume = CalamityMod.Sounds.CommonCalamitySounds.ELRFireSound.Volume, Pitch = CalamityMod.Sounds.CommonCalamitySounds.LaserCannonSound.Pitch - 0.2f });
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    Projectile explosion = Main.projectile[Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, Vector2.Zero, ModContent.ProjectileType<AresGaussNukeProjectileBoom>(), laserdamage * 2, 0)];
+                                    if (explosion.whoAmI.WithinBounds(Main.maxProjectiles))
+                                    {
+                                        explosion.ai[1] = 560f + i * 90f;
+                                        explosion.localAI[1] = 0.25f;
+                                        explosion.Opacity = MathHelper.Lerp(0.03f, 0.6f, i / 3f) + Main.rand.NextFloat(-0.08f, 0.08f);
+                                        explosion.netUpdate = true;
+                                    }
+                                }
+                            }
+                            NPC.ai[2] = 0;
+                            if (NPC.ai[1] == 0)
+                            {
+                                hypnos.ai[3]++;
+                            }
+                            destiny.X = target.Center.X - NPC.width / 2;
+                            destiny.Y = target.Center.Y - NPC.height / 2;
+                        }
+                    }
                     break;
             }
             //This is copypasted Corite AI
@@ -879,7 +1008,10 @@ namespace CalValPlus.NPCs.Hypnos
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor)
         {
             SmokeDrawer.DrawSet(NPC.Center);
-            DrawHypnos(spriteBatch, screenPos, drawColor);
+            if (!(NPC.ai[0] == 11 && hypnos.ai[1] >= 31))
+            {
+                DrawHypnos(spriteBatch, screenPos, drawColor);
+            }
             if (!p2)
             {
                 drawchain(spriteBatch, screenPos, drawColor);
