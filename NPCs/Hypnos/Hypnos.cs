@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -10,7 +11,21 @@ using CalamityMod.Particles;
 using Microsoft.Xna.Framework.Graphics;
 using CalamityMod;
 using static CalamityMod.World.CalamityWorld;
+using CalamityMod.Items.Accessories;
+using CalamityMod.Items.Armor.Vanity;
+using CalamityMod.Items.LoreItems;
+using CalamityMod.Items.Materials;
+using CalamityMod.Items.Mounts;
+using CalamityMod.Items.Placeables.Furniture.BossRelics;
+using CalamityMod.Items.Placeables.Furniture.Trophies;
+using CalamityMod.Items.Potions;
+using CalamityMod.Items.TreasureBags;
+using CalamityMod.Items.Weapons.Melee;
+using CalamityMod.Items.Weapons.Ranged;
+using CalamityMod.Items.Weapons.Rogue;
+using CalamityMod.Items.Weapons.DraedonsArsenal;
 using CalValPlus.Projectiles;
+using Terraria.GameContent.ItemDropRules;
 
 namespace CalValPlus.NPCs.Hypnos
 {
@@ -70,6 +85,8 @@ namespace CalValPlus.NPCs.Hypnos
 
         public override void AI()
         {
+            // Lol
+            Main.player[Main.myPlayer].ZoneTowerVortex = true;
             if (Main.getGoodWorld)
             {
                 NPC.scale = 1.75f;
@@ -748,6 +765,42 @@ namespace CalValPlus.NPCs.Hypnos
             NPC.damage = (int)(NPC.damage * NPC.GetExpertDamageMultiplier());
         }
 
+        public override void ModifyNPCLoot(NPCLoot npcLoot)
+        {
+            LeadingConditionRule normalOnly = new LeadingConditionRule(new Conditions.NotExpert());
+            npcLoot.Add(normalOnly);
+
+            // Trophies
+            normalOnly.Add(ModContent.ItemType<ThanatosTrophy>(), 10);
+
+            // Relic
+            npcLoot.Add(ItemDropRule.ByCondition(DropHelper.If(() => Main.masterMode || revenge), ModContent.ItemType<DraedonRelic>()));
+
+            // Lore item
+            npcLoot.Add(ItemDropRule.ByCondition(DropHelper.If(() => !DownedBossSystem.downedExoMechs), ModContent.ItemType<KnowledgeExoMechs>()));
+
+            // Treasure bag
+            npcLoot.Add(ItemDropRule.BossBag(ModContent.ItemType<DraedonBag>()));
+
+            // All other drops are contained in the bag, so they only drop directly on Normal
+            if (!Main.expertMode)
+            {
+                // Materials
+                normalOnly.Add(ModContent.ItemType<ExoPrism>(), 1, 25, 30);
+
+                // Equipment
+                normalOnly.Add(ModContent.ItemType<ExoThrone>());
+                normalOnly.Add(ModContent.ItemType<DraedonsHeart>());
+
+                // Vanity
+                // Higher chance due to how the drops work
+                normalOnly.Add(ModContent.ItemType<DraedonMask>(), 7);
+                normalOnly.Add(ModContent.ItemType<ThanatosMask>(), 7);
+            }
+            CalValPlusWorld.downedHypnos = true;
+            CalValPlusWorld.UpdateWorldBool();
+        }
+
         public override void OnKill()
         {
             if (aura != null)
@@ -771,6 +824,30 @@ namespace CalValPlus.NPCs.Hypnos
         public override bool CheckActive()
         {
             return false;
+        }
+        public override void SendExtraAI(BinaryWriter writer)
+        {
+            writer.Write(afterimages);
+            writer.Write(initialized);
+            writer.Write(p2);
+            writer.Write(enraged);
+            writer.Write(beserk);
+            writer.Write(hostdamage);
+            writer.Write(ragetimer);
+            writer.Write(beserktimer);
+        }
+
+        public override void ReceiveExtraAI(BinaryReader reader)
+        {
+            afterimages = reader.ReadBoolean();
+            beserk = reader.ReadBoolean();
+            initialized = reader.ReadBoolean();
+            p2 = reader.ReadBoolean();
+            enraged = reader.ReadBoolean();
+
+            ragetimer = reader.ReadInt32();
+            hostdamage = reader.ReadInt32();
+            beserktimer = reader.ReadInt32();
         }
     }
 }

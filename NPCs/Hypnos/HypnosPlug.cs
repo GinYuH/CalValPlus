@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -110,6 +111,15 @@ namespace CalValPlus.NPCs.Hypnos
         public override bool CheckActive()
         {
             return false;
+        }
+        public override void SendExtraAI(BinaryWriter writer)
+        {
+            writer.Write(initialized);
+        }
+
+        public override void ReceiveExtraAI(BinaryReader reader)
+        {
+            initialized = reader.ReadBoolean();
         }
     }
 }

@@ -40,6 +40,27 @@ namespace CalValPlus
 				"The maniacal tinkerer finally found a weak opponent",
 				null
 				});
+					bossChecklist.Call(new object[12]
+				{
+				"AddBoss",
+				22.5f,
+				ModContent.NPCType<NPCs.Hypnos.Hypnos>(),
+				this,
+				"XP-00 Hypnos",
+				(Func<bool>)(() => CalValPlusWorld.downedHypnos),
+				ModContent.ItemType<CalamityMod.Items.Pets.BloodyVein>(),
+				null,
+				new List<int>
+				{
+					ModLoader.GetMod("CalamityMod").Find<ModItem>("WulfrumShard").Type,
+					ModLoader.GetMod("CalamityMod").Find<ModItem>("EnergyCore").Type,
+					ModLoader.GetMod("CalValEX").Find<ModItem>("WulfrumHelipack").Type,
+					ModLoader.GetMod("CalValEX").Find<ModItem>("WulfrumKeys").Type
+				},
+				$"Jam a [i:{ModContent.ItemType<CalamityMod.Items.Pets.BloodyVein>()}] into the codebreaker",
+				"An imperfection after allÅc what a shame.",
+				null
+				});
 				}
 			}
 		}

@@ -17,6 +17,7 @@ namespace CalValPlus
     {
 		public bool asttttr = false;
 		public static bool downedJohnWulfrum = false;
+		public static bool downedHypnos = false;
 		public static bool jungledialogue = false;
 		public static bool helldialogue = false;
 		public static bool plaguedialogue = false;
@@ -187,25 +188,47 @@ namespace CalValPlus
 				NetMessage.SendData(MessageID.WorldData);
 			}
 		}
-		public override void OnWorldLoad()/* tModPorter Suggestion: Also override OnWorldUnload, and mirror your worldgen-sensitive data initialization in PreWorldGen */
+		public override void OnWorldLoad()
 		{
 			downedJohnWulfrum = false;
+			downedHypnos = false;
 		}
-		/*public override void SaveWorldData(TagCompound tag)/* tModPorter Suggestion: Edit tag parameter instead of returning new TagCompound 
+		public override void OnWorldUnload()
 		{
-			List<string> list = new List<string>();
+			downedJohnWulfrum = false;
+			downedHypnos = false;
+		}
+		public override void SaveWorldData(TagCompound downed)
+		{
+			if (downedHypnos)
+			{
+				downed["hypnos"] = true;
+			}
+
 			if (downedJohnWulfrum)
 			{
-				list.Add("johnWulfrum");
+				downed["johnwulfrum"] = true;
 			}
-			TagCompound val = new TagCompound();
-			val.Add("downed", (object)list);
-			return (TagCompound)(object)val;
-		}*/
+		}
+
 		public override void LoadWorldData(TagCompound tag)
 		{
 			IList<string> list = tag.GetList<string>("downed");
 			downedJohnWulfrum = list.Contains("johnWulfrum");
+			downedHypnos= list.Contains("hypnos");
+		}
+		public override void NetSend(BinaryWriter writer)
+		{
+			BitsByte flags = new BitsByte();
+			flags[0] = downedHypnos;
+			flags[1] = downedJohnWulfrum;
+			writer.Write(flags);
+		}
+		public override void NetReceive(BinaryReader reader)
+		{
+			BitsByte flags = reader.ReadByte();
+			downedHypnos = flags[0];
+			downedJohnWulfrum = flags[1];
 		}
 	}
 }

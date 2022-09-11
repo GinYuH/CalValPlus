@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -31,7 +32,7 @@ namespace CalValPlus.NPCs.Hypnos
 
         public int offx;
         public int offy;
-        public static float lvf = 1.1f; //laser velocity factor
+        public float lvf = 1; //laser velocity factor
 
         Vector2 destiny;
 
@@ -104,11 +105,15 @@ namespace CalValPlus.NPCs.Hypnos
             }
             if (p2)
             {
-                lvf = 1.1f;
+                lvf = 1.3f;
             }
-            else
+            else if (CalamityWorld.death)
             {
-                lvf = 1;
+                lvf = 1.2f;
+            }
+            else if (CalamityWorld.revenge)
+            {
+                lvf = 1.1f;
             }
             SmokeDrawer.ParticleSpawnRate = 9999999;
             if (ring != null)
@@ -1250,6 +1255,43 @@ namespace CalValPlus.NPCs.Hypnos
         public override bool CheckActive()
         {
             return false;
+        }
+        public override void SendExtraAI(BinaryWriter writer)
+        {
+            writer.Write(hypnosafter);
+            writer.Write(afterimages);
+            writer.Write(initialized);
+            writer.Write(p2);
+            writer.Write(enraged);
+
+            writer.Write(corite1);
+            writer.Write(corite2);
+            writer.Write(corite3);
+            writer.Write(corite4);
+            writer.Write(rottimer);
+
+            writer.Write(offx);
+            writer.Write(offy);
+            writer.Write(lvf);
+        }
+
+        public override void ReceiveExtraAI(BinaryReader reader)
+        {
+            afterimages = reader.ReadBoolean();
+            hypnosafter = reader.ReadBoolean();
+            initialized = reader.ReadBoolean();
+            p2 = reader.ReadBoolean();
+            enraged = reader.ReadBoolean();
+
+            corite1 = reader.ReadInt32();
+            corite2 = reader.ReadInt32();
+            corite3 = reader.ReadInt32();
+            corite4 = reader.ReadInt32();
+            rottimer = reader.ReadInt32();
+
+            offx = reader.ReadInt32();
+            offy = reader.ReadInt32();
+            lvf = reader.ReadInt32();
         }
     }
 }
