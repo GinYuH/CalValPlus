@@ -12,9 +12,9 @@ namespace CalValPlus
 	{
 		public override void RightClick(int i, int j, int type)
         {
-			if (type == ModContent.TileType<CodebreakerTile>() && Main.LocalPlayer.HeldItem.type == ModContent.ItemType<BloodyVein>())
+			if (type == ModContent.TileType<CodebreakerTile>() && Main.LocalPlayer.HeldItem.type == ModContent.ItemType<BloodyVein>() && NPC.CountNPCS(ModContent.NPCType<Draedon>()) <= 0)
             {
-				NPC.NewNPC(new Terraria.DataStructures.EntitySource_TileBreak(i, j), (int)Main.LocalPlayer.Center.X, (int)(Main.LocalPlayer.Center.Y - 2200), ModContent.NPCType<Draedon>());
+				NPC.NewNPC(new Terraria.DataStructures.EntitySource_TileBreak(i, j), (int)Main.LocalPlayer.Center.X, (int)(Main.LocalPlayer.Center.Y - 1200), ModContent.NPCType<Draedon>());
             }
         }
 		public override bool CanKillTile(int i, int j, int type, ref bool blockDamaged)
