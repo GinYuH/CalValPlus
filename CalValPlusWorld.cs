@@ -10,6 +10,7 @@ using Terraria.GameContent.Generation;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.WorldBuilding;
+using SubworldLibrary;
 
 namespace CalValPlus
 {
@@ -230,5 +231,29 @@ namespace CalValPlus
 			downedHypnos = flags[0];
 			downedJohnWulfrum = flags[1];
 		}
-	}
+
+        public override void PreUpdateWorld()
+        {
+			if (SubworldSystem.IsActive<Subworlds.StiltVillage>())
+			{
+				// Update mechanisms
+				Wiring.UpdateMech();
+
+				// Update tile entities
+				TileEntity.UpdateStart();
+				foreach (TileEntity te in TileEntity.ByID.Values)
+				{
+					te.Update();
+				}
+				TileEntity.UpdateEnd();
+
+				// Update liquid
+				if (++Liquid.skipCount > 1)
+				{
+					Liquid.UpdateLiquid();
+					Liquid.skipCount = 0;
+				}
+			}
+		}
+    }
 }

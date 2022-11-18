@@ -2,6 +2,7 @@
 using Terraria.ID;
 using Microsoft.Xna.Framework;
 using System;
+using SubworldLibrary;
 using Terraria.ModLoader;
 using CalValPlus.Projectiles;
 
@@ -28,5 +29,18 @@ namespace CalValPlus.Items.Weapons.Ranged
 			Item.shootSpeed = 40f;
 			Item.UseSound = SoundID.Item111;
 		}
-	}
+
+        public override bool? UseItem(Player player)
+        {
+			if (SubworldSystem.IsActive<Subworlds.StiltVillage>())
+			{
+				SubworldSystem.Exit();
+			}
+			else
+			{
+				SubworldSystem.Enter<Subworlds.StiltVillage>();
+			}
+			return null;
+        }
+    }
 }

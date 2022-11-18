@@ -33,3 +33,5 @@ obj/project.nuget.cache
 *.targets
 *.props
 obj/CalValPlus.csproj.nuget.g.props
+obj/Debug/net6.0/CalValPlus.csproj.FileListAbsolute.txt
+CalValPlus.csproj
